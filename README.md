@@ -1,2 +1,2 @@
-# node-api-boilerplate
-NodeJS Api Project Template
+# NOTEPEDIA
+Create note. Add friend. Share it. That's it.

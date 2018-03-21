@@ -1,7 +1,7 @@
 {
-  "name": "node-api-boilerplate",
+  "name": "notepedia",
   "version": "1.0.0",
-  "description": "NodeJS Api Project Template",
+  "description": "Create note. Add friend. Share it. That's it.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dizefurkan/node-api-boilerplate.git"
+    "url": "git+https://dizefurkan@bitbucket.org/dizefurkan/notepedia.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dizefurkan/node-api-boilerplate/issues"
+    "url": "https://bitbucket.org/dizefurkan/notepedia"
   },
-  "homepage": "https://github.com/dizefurkan/node-api-boilerplate#readme",
+  "homepage": "https://bitbucket.org/dizefurkan/notepedia",
   "dependencies": {
     "babel-preset-es2015": "^6.24.1",
     "body-parser": "^1.18.2",

@@ -18,7 +18,7 @@ export default [
         handler: (req, res) => {
             const rb = req.body;
             if (rb.username && rb.password) {
-                const usernameFind = auth.findOne('users', 'username', rb.username);
+                const usernameFind = auth.findOne('User', 'username', rb.username);
                 usernameFind.then(data => {
                     if (data.found) {
                         if (data.user.password === rb.password) {
@@ -33,7 +33,7 @@ export default [
                     }
                 })
             } else {
-                res.send({ success: false, message: 'All Area is Required!' });
+                res.send({ success: false, message: 'Please Fill The Required Fields!' });
             }
         }
     },
@@ -50,13 +50,13 @@ export default [
         handler: (req, res) => {
             const rb = req.body;
             if (rb.username && rb.email && rb.password && rb.name && rb.surname) {
-                const usernameFind = auth.findOne('users', 'username', rb.username);
+                const usernameFind = auth.findOne('User', 'username', rb.username);
                 usernameFind.then(data => {
                     if (!data.found) {
-                        const emailFind = auth.findOne('users', 'email', rb.email);
+                        const emailFind = auth.findOne('User', 'email', rb.email);
                         emailFind.then(data => {
                             if (!data.found) {
-                                models.users.create({
+                                models.User.create({
                                     username: req.body.username,
                                     email: req.body.email,
                                     password: req.body.password,
@@ -84,7 +84,7 @@ export default [
                     }
                 });
             } else {
-                res.send({ success: false, message: 'All Area Is Required!' });
+                res.send({ success: false, message: 'Please Fill The Required Fields!' });
             }
         }
     }

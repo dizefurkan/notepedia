@@ -12,7 +12,6 @@ app.use((req, res, next) => {
         if (token) {
             const checkToken = auth.verifyToken(token);
             checkToken.then(result => {
-                req.decoded = result.verifyResult;
                 next();
             }).catch(err => {
                 res.send({ success: false, message: 'Token Error' });

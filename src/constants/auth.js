@@ -3,13 +3,24 @@ import { models } from '../models';
 import { jwtConfig } from '../config';
 
 export default {
-    findOne: (table, column, value) => {
+    findOne: (table, field, value) => {
         return new Promise((resolve, reject) => {
-            models[table].findOne( { where: { [column]: value }}).then(response => {
+            models[table].findOne( { where: { [field]: value }}).then(response => {
                 if (response) {
                     resolve({ message: 'Found', found: true, user: response });
                 } else {
                     resolve({ message: 'Not Found', found: false });
+                }
+            })
+        })
+    },
+    getAll: (table) => {
+        return new Promise((resolve, reject) => {
+            models[table].findAll().then(response => {
+                if (response) {
+                    resolve({ success: true, message: 'Found', data: response });
+                } else {
+                    reject({ success: false, message: 'No Record' });
                 }
             })
         })

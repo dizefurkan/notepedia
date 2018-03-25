@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { models } from '../models';
 import { jwtConfig } from '../config';
+import dbOperations from './dbOperations';
 
 export default {
     findOne: (table, field, value) => {
@@ -11,8 +12,8 @@ export default {
                 } else {
                     resolve({ message: 'Not Found', found: false });
                 }
-            })
-        })
+            });
+        });
     },
     getAll: (table) => {
         return new Promise((resolve, reject) => {
@@ -22,18 +23,31 @@ export default {
                 } else {
                     reject({ success: false, message: 'No Record' });
                 }
-            })
-        })
+            });
+        });
+    },
+    getAllByKey: (table, key, value) => {
+        return new Promise((resolve, reject) => {
+            models[table].findAll({
+                where: {
+                    [key]: value
+                }
+            }).then(response => {
+                resolve({ data: response });
+            }).catch(error => {
+                reject({ error: error });
+            });
+        });
     },
     verifyToken: (token) => {
         return new Promise((resolve, reject) => {
             const verify = jwt.verify(token, jwtConfig.secretKey, (err, data) => {
                 if (err) {
-                    reject({ success: false, message: err });
+                    reject({ success: false, error: err });
                 } else {
-                    resolve({ success: true, message: 'Token is Decoded', verifyResult: data });
+                    resolve({ success: true, identity: data });
                 }
             });
-        })
+        });
     }
 };

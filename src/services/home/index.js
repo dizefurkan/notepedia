@@ -1,4 +1,4 @@
-import auth from '../../constants/auth';
+import dbOperations from '../../constants/dbOperations';
 
 export default [
     {
@@ -17,9 +17,9 @@ export default [
     },
     {
         method: 'get',
-        path: '/getusers',
+        path: '/users',
         handler: (req, res) => {
-            const result = auth.getAll('User');
+            const result = dbOperations.getAll('User');
             result.then(response => {
                 const userlist = [];
                 response.data.forEach(item => {

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { jwtConfig } from '../../config';
 
 import { models } from '../../models';
-import auth from '../../constants/auth';
+import dbOperations from '../../constants/dbOperations';
 
 export default [
     {
@@ -18,7 +18,7 @@ export default [
         handler: (req, res) => {
             const rb = req.body;
             if (rb.username && rb.password) {
-                const usernameFind = auth.findOne('User', 'username', rb.username);
+                const usernameFind = dbOperations.findOne('User', 'username', rb.username);
                 usernameFind.then(data => {
                     if (data.found) {
                         if (data.user.password === rb.password) {
@@ -50,10 +50,10 @@ export default [
         handler: (req, res) => {
             const rb = req.body;
             if (rb.username && rb.email && rb.password && rb.name && rb.surname) {
-                const usernameFind = auth.findOne('User', 'username', rb.username);
+                const usernameFind = dbOperations.findOne('User', 'username', rb.username);
                 usernameFind.then(data => {
                     if (!data.found) {
-                        const emailFind = auth.findOne('User', 'email', rb.email);
+                        const emailFind = dbOperations.findOne('User', 'email', rb.email);
                         emailFind.then(data => {
                             if (!data.found) {
                                 models.User.create({

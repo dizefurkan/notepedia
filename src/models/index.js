@@ -1,7 +1,7 @@
-var Sequelize = require('sequelize');
-var fs = require('fs');
-var path = require('path');
-var sequelize = require('../config/sequelize');
+import Sequelize from 'sequelize';
+import fs from 'fs';
+import path from 'path';
+import sequelize from '../config/sequelize';
 
 const connection = new Sequelize(sequelize.development.url);
 const models = {};

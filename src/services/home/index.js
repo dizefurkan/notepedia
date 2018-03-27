@@ -1,4 +1,4 @@
-import dbOperations from '../../constants/dbOperations';
+import { dbOperations } from '../../constants';
 
 export default [
     {
@@ -19,16 +19,15 @@ export default [
         method: 'get',
         path: '/users',
         handler: (req, res) => {
-            const result = dbOperations.getAll('User');
-            result.then(response => {
+            dbOperations.getAll('User').then(response => {
                 const userlist = [];
                 response.data.forEach(item => {
-                    userlist.push(item.username);
-                })
+                    userlist.push(item.id + " " + item.username);
+                });
                 res.send({ count: response.data.length, users: userlist });
             }).catch(error => {
                 res.send({ error: error });
             });
         }
-    }
+    },
 ];

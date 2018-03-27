@@ -1,6 +1,6 @@
 import { models } from '../../models';
 import { jwtConfig } from '../../config';
-import dbOperations from '../../constants/dbOperations';
+import { dbOperations } from '../../constants';
 
 export default [
     {
@@ -26,14 +26,15 @@ export default [
         method: 'post',
         path: '/mynotes/add',
         handler: (req, res) => {
-            if (req.body.title || req.body.content) {
+            const { title, content } = req.body
+            if (title || content) {
                 const token = req.headers['token'];
                 const decoded = dbOperations.verifyToken(token);
                 decoded.then(result => {
                     const user = result.identity.user;
                     models.Note.create({
-                        title: req.body.title,
-                        content: req.body.content,
+                        title: title,
+                        content: content,
                         userId: user.id
                     });
                     res.send({ success: true, message: 'Note was cretead'});

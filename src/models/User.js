@@ -83,13 +83,13 @@ export default (Sequelize, DataTypes) => {
             sourceKey: 'id'
         });
 
-        User.hasMany(models.FriendRequest, {
+        User.hasMany(models.FriendsRequest, {
             as: 'friendRequestSource',
             foreignKey: 'sourceId',
             sourceKey: 'id'
         });
 
-        User.hasMany(models.FriendRequest, {
+        User.hasMany(models.FriendsRequest, {
             as: 'friendRequestTarget',
             foreignKey: 'targetId',
             sourceKey: 'id'

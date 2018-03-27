@@ -1,5 +1,5 @@
 export default (Sequelize, DataTypes) => {
-    var FriendRequest = Sequelize.define('FriendRequest',
+    var FriendsRequest = Sequelize.define('FriendsRequest',
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -12,8 +12,8 @@ export default (Sequelize, DataTypes) => {
         }
     );
 
-    FriendRequest.associate = (models) => {
-        FriendRequest.belongsTo(models.User, {
+    FriendsRequest.associate = (models) => {
+        FriendsRequest.belongsTo(models.User, {
             as: 'source',
             foreignKey: {
                 name: 'sourceId',
@@ -21,7 +21,7 @@ export default (Sequelize, DataTypes) => {
             }
         });
 
-        FriendRequest.belongsTo(models.User, {
+        FriendsRequest.belongsTo(models.User, {
             as: 'target',
             foreignKey: {
                 name: 'targetId',
@@ -29,5 +29,5 @@ export default (Sequelize, DataTypes) => {
             }
         });
     }
-    return FriendRequest;
+    return FriendsRequest;
 };

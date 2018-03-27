@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { jwtConfig } from '../../config';
-
 import { models } from '../../models';
-import dbOperations from '../../constants/dbOperations';
+import { dbOperations } from '../../constants';
 
 export default [
     {
@@ -16,12 +15,11 @@ export default [
         method: 'post',
         path: '/login',
         handler: (req, res) => {
-            const rb = req.body;
-            if (rb.username && rb.password) {
-                const usernameFind = dbOperations.findOne('User', 'username', rb.username);
-                usernameFind.then(data => {
+            const { username, password } = req.body;
+            if (username && password) {
+                dbOperations.findOne('User', 'username', username).then(data => {
                     if (data.found) {
-                        if (data.user.password === rb.password) {
+                        if (data.user.password === password) {
                             const user = data.user;
                             const token = jwt.sign( { user }, jwtConfig.secretKey );
                             res.send({ success: true, message: 'Welcome', user: data.user, token: token });
@@ -48,20 +46,19 @@ export default [
         method: 'post',
         path: '/register',
         handler: (req, res) => {
-            const rb = req.body;
-            if (rb.username && rb.email && rb.password && rb.name && rb.surname) {
-                const usernameFind = dbOperations.findOne('User', 'username', rb.username);
-                usernameFind.then(data => {
+            const { username, email, password, name, surname } = req.body;
+            if (username && email && password && name && surname) {
+                dbOperations.findOne('User', 'username', username).then(data => {
                     if (!data.found) {
-                        const emailFind = dbOperations.findOne('User', 'email', rb.email);
+                        const emailFind = dbOperations.findOne('User', 'email', email);
                         emailFind.then(data => {
                             if (!data.found) {
                                 models.User.create({
-                                    username: req.body.username,
-                                    email: req.body.email,
-                                    password: req.body.password,
-                                    name: req.body.name,
-                                    surname: req.body.surname,
+                                    username: username,
+                                    email: email,
+                                    password: password,
+                                    name: name,
+                                    surname: surname,
                                     isApproved: false
                                 }).then((result) => {
                                     res.send( {

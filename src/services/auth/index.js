@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { jwtConfig } from '../../config';
+import { jwtConfig, replies } from '../../config';
 import { models } from '../../models';
 import { dbOperations } from '../../constants';
 
@@ -22,16 +22,16 @@ export default [
                         if (data.user.password === password) {
                             const user = data.user;
                             const token = jwt.sign( { user }, jwtConfig.secretKey );
-                            res.send({ success: true, message: 'Welcome', user: data.user, token: token });
+                            res.send({ success: true, message: replies.welcome, user: data.user, token: token });
                         } else {
-                            res.send({ success: false, message: 'Wrong Password'});
+                            res.send({ success: false, message: replies.wrongPassword });
                         }
                     } else {
-                        res.send({ success: false, message: 'No Username Found' });
+                        res.send({ success: false, message: replies.notFound });
                     }
                 })
             } else {
-                res.send({ success: false, message: 'Please Fill The Required Fields!' });
+                res.send({ success: false, message: replies.fillRequiredfields });
             }
         }
     },
@@ -63,7 +63,7 @@ export default [
                                 }).then((result) => {
                                     res.send( {
                                         success: true,
-                                        message: 'Register Successful',
+                                        message: replies.registerSuccess,
                                         data: result
                                     });
                                 }).catch((error) => {
@@ -73,15 +73,15 @@ export default [
                                     });
                                 });
                             } else {
-                                res.send({ success: false, message: 'This Email is Already Have' });
+                                res.send({ success: false, message: replies.thisEmail + replies.alreadyHave });
                             }
                         })
                     } else {
-                        res.send({ success: false, message: 'This Username is Already Have' });
+                        res.send({ success: false, message: replies.thisUsername + replies.alreadyHave });
                     }
                 });
             } else {
-                res.send({ success: false, message: 'Please Fill The Required Fields!' });
+                res.send({ success: false, message: replies.fillRequiredfields });
             }
         }
     }

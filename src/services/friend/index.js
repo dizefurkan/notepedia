@@ -45,13 +45,13 @@ export default [
     },
     {
         method: 'post',
-        path: '/friends/accept/:id(\\d+)',
+        path: '/friendrequest/accept/:id(\\d+)',
         handler: (req, res) => {
             const token = req.headers[jwtConfig.tokenName];
             dbOperations.verifyToken(token).then(result => {
                 const requestId = req.params.id;
                 const user = result.identity.user;
-                dbOperations.checkFriendRequestandId(requestId, user.id).then(result => {
+                dbOperations.checkFriendRequestwithId('accept', requestId, user.id).then(result => {
                     if (result === null) {
                         res.send({ success: false, message: replies.noRecord });
                     } else {
@@ -74,6 +74,33 @@ export default [
             }).catch(error => {
                 res.send(error);
             });
+        }
+    },
+    {
+        method: 'post',
+        path: '/friendrequest/refuse/:id(\\d+)',
+        handler: (req, res) => {
+            const token = req.headers[jwtConfig.tokenName];
+            dbOperations.verifyToken(token).then(result => {
+                const user = result.identity.user;
+                const requestId = req.params.id;
+                dbOperations.checkFriendRequestwithId('refuse', requestId, user.id).then(result => {
+                    if (result === null) {
+                        res.send({ success: false, message: replies.noRecord });
+                    } else {
+                        models.FriendsRequest.destroy({
+                            returning: true,
+                            where: {
+                                id: requestId
+                            }
+                        }).then(result => {
+                            res.send({ success: true });
+                        });
+                    }
+                });
+            }).catch(error => {
+                res.send(error);
+            })
         }
     },
     {

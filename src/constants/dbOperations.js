@@ -128,17 +128,31 @@ export default {
             });
         });
     },
-    checkFriendRequestandId: (requestId, userId) => {
+    checkFriendRequestwithId: (key, requestId, userId) => {
         return new Promise((resolve, reject) => {
             const Op = Sequelize.Op;
-            models.FriendsRequest.findOne({
-                where: {
-                    id: requestId,
-                    targetId: userId
-                }
-            }).then(result => {
-                resolve(result);
-            })
+            if (key === 'accept') {
+                models.FriendsRequest.findOne({
+                    where: {
+                        id: requestId,
+                        targetId: userId
+                    }
+                }).then(result => {
+                    resolve(result);
+                });
+            } else {
+                models.FriendsRequest.findOne({
+                    where: {
+                        id: requestId,
+                        [Op.or]: [
+                            { sourceId: userId },
+                            { targetId: userId }
+                        ]
+                    }
+                }).then(result => {
+                    resolve(result);
+                });
+            }
         });
     },
     verifyToken: (token) => {

@@ -1,6 +1,6 @@
 import express from 'express';
 import expressCore from './src/core/express';
-import { server } from './src/config';
+import { server, replies } from './src/config';
 
 const app = express();
 
@@ -10,6 +10,6 @@ app.listen(server.port, (err) => {
     if (err) {
         console.log(err);
     } else {
-        console.log("Server listening at localhost:%s", server.port);
+        console.log(replies.serverListening, server.port);
     }
 });

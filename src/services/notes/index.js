@@ -1,5 +1,5 @@
 import { models } from '../../models';
-import { jwtConfig } from '../../config';
+import { jwtConfig, replies } from '../../config';
 import { dbOperations } from '../../constants';
 
 export default [
@@ -18,7 +18,7 @@ export default [
                     res.send({ error: error });
                 });
             }).catch(error => {
-                res.send({ error: 'HATA' });
+                res.send({ error: error });
             });
         }
     },
@@ -37,12 +37,12 @@ export default [
                         content: content,
                         userId: user.id
                     });
-                    res.send({ success: true, message: 'Note was cretead'});
+                    res.send({ success: true, message: replies.noteWasCreated });
                 }).catch(error => {
                     res.send({ error: error });
                 });
             } else {
-                res.send({ success: false, message: 'It can not be empty!' });
+                res.send({ success: false, message: replies.cantEmpty });
             }
         }
     },
@@ -66,7 +66,7 @@ export default [
                         if (!result[0]) {
                             res.status(404).send({ success: false, message: 'Note not found!' });
                         } else {
-                            res.send({ success: true, message: 'Note was updated!', result: result });
+                            res.send({ success: true, message: replies.noteWasUpdated, result: result });
                         }
                     }).catch(error => {
                         res.send({ success: false, error: error });
@@ -75,7 +75,7 @@ export default [
                     res.send({ error: error });
                 });
             } else {
-                res.send({ success: false, message: 'It can not be empty!' });
+                res.send({ success: false, message: replies.cantEmpty });
             }
         }
     },
@@ -95,9 +95,9 @@ export default [
                     }
                 }).then(result => {
                     if (!result[0]) {
-                        res.status(404).send({ success: false, message: 'Note not found!' });
+                        res.status(404).send({ success: false, message: replies.notFound });
                     } else {
-                        res.send({ success: true, message: 'Note was deleted!', result: result });
+                        res.send({ success: true, message: replies.noteWasDeleted, result: result });
                     }
                 }).catch(error => {
                     res.send({ success: false, error: error });

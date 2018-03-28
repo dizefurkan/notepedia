@@ -17,23 +17,68 @@ export default [
                     dbOperations.findOne('User', 'username', username).then(result => {
                         const targetUser = result.user;
                         dbOperations.friendControl(sourceUser.id, targetUser.id).then(result => {
-                            if (!result.isFriend) {
+                            if (result === null) {
                                 dbOperations.friendRequestControl(sourceUser.id, targetUser.id).then(result => {
-                                    models.FriendsRequest.create({
-                                        sourceId: sourceUser.id,
-                                        targetId: targetUser.id
-                                    });
-                                    res.send("Friend request was send.");
+                                    if (result === null) {
+                                        models.FriendsRequest.create({
+                                            sourceId: sourceUser.id,
+                                            targetId: targetUser.id
+                                        }).then(result => {
+                                            res.send({ success: true, message: successFriendshipRequest, data: result });
+                                        }).catch(error => {
+                                            res.send({ success: false, error: error });
+                                        })
+                                    } else {
+                                        res.send({ success: false, message: replies.alreadySentARequest, data: result });
+                                    }
                                 });
                             } else {
-                                res.send(result);
+                                res.send({ success: false, message: replies.alreadyFriends, data: result });
                             }
                         });
                     }).catch(error => {
-                        res.send(error);
+                        res.send({ success: false, message: replies.notFound });
                     })
                 }
             });
+        }
+    },
+    {
+        method: 'get',
+        path: '/friends',
+        handler: (req, res) => {
+            const token = req.headers[jwtConfig.tokenName];
+            dbOperations.verifyToken(token).then(result => {
+                const user = result.identity.user;
+                dbOperations.getAllFriends(user.id).then(result => {
+                    res.send(result);
+                }).catch(error => {
+                    res.send(error);
+                });
+            }).catch(error => {
+                res.send(error);
+            })
+        }
+    },
+    {
+        method: 'get',
+        path: '/friendsrequests',
+        handler: (req, res) => {
+            const token = req.headers[jwtConfig.tokenName];
+            dbOperations.verifyToken(token).then(result => {
+                const user = result.identity.user;
+                dbOperations.getAllFriendsRequests(user.id).then(result => {
+                    if (result.length) {
+                        res.send(result);
+                    } else {
+                        res.send({ message: replies.noRequest });
+                    }
+                }).catch(error => {
+                    res.send(error);
+                });
+            }).catch(error => {
+                res.send(error);
+            })
         }
     }
 ];

@@ -40,6 +40,40 @@ export default {
             });
         });
     },
+    getAllFriends: (userId) => {
+        return new Promise((resolve, reject) => {
+            const Op = Sequelize.Op;
+            models.Friend.findAll({
+                where: {
+                    [Op.or]: [
+                        { senderId: userId },
+                        { acceptorId: userId }
+                    ]
+                }
+            }).then(response => {
+                resolve(response);
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    },
+    getAllFriendsRequests: (userId) => {
+        return new Promise((resolve, reject) => {
+            const Op = Sequelize.Op;
+            models.FriendsRequest.findAll({
+                where: {
+                    [Op.or]: [
+                        { sourceId: userId },
+                        { targetId: userId }
+                    ]
+                }
+            }).then(response => {
+                resolve(response);
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    },
     friendControl: (sender, acceptor) => {
         return new Promise((resolve, reject) => {
             const Op = Sequelize.Op;
@@ -61,13 +95,10 @@ export default {
                     ]
                 }
             }).then(result => {
-                if (result === null) {
-                    resolve({ isFriend: false });
-                }
-                if (Object.keys(result).length) {
-                    resolve({ isFriend: true, result: result });
-                }
-            });
+                resolve(result);
+            }).catch(error => {
+                reject(error);
+            })
         });
     },
     friendRequestControl: (source, target) => {
@@ -91,12 +122,9 @@ export default {
                     ]
                 }
             }).then(result => {
-                if (result === null) {
-                    resolve({ haveFriendRequest: false });
-                }
-                if (Object.keys(result).length) {
-                    resolve({ haveFriendRequest: true, result: result });
-                }
+                resolve(result);
+            }).catch(error => {
+                reject(error);
             });
         });
     },

@@ -81,7 +81,7 @@ export default [
     },
     {
         method: 'get',
-        path: '/mynotes/delete/:id(\\d+)/',
+        path: '/mynotes/delete/:id(\\d+)',
         handler: (req, res) => {
             const token = req.headers['token'];
             const decoded = dbOperations.verifyToken(token);

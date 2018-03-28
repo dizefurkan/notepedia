@@ -128,6 +128,19 @@ export default {
             });
         });
     },
+    checkFriendRequestandId: (requestId, userId) => {
+        return new Promise((resolve, reject) => {
+            const Op = Sequelize.Op;
+            models.FriendsRequest.findOne({
+                where: {
+                    id: requestId,
+                    targetId: userId
+                }
+            }).then(result => {
+                resolve(result);
+            })
+        });
+    },
     verifyToken: (token) => {
         return new Promise((resolve, reject) => {
             const verify = jwt.verify(token, jwtConfig.secretKey, (err, data) => {

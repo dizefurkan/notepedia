@@ -6,5 +6,6 @@ export default {
     noRequest: "No request",
     alreadyFriends: "You are already friends!",
     alreadySentARequest: "You are already sent a friend request!",
-    successFriendshipRequest: "Friendship request was successfully sent."
+    successFriendshipRequest: "Friendship request was successfully sent.",
+    acceptedFriendRequest: "Friend Request was accepted successfully."
 };

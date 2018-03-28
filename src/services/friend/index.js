@@ -45,6 +45,38 @@ export default [
     },
     {
         method: 'post',
+        path: '/friends/delete/:username',
+        handler: (req, res) => {
+            const username = req.params.username;
+            const token = req.headers[jwtConfig.tokenName];
+            dbOperations.verifyToken(token).then(result => {
+                const user = result.identity.user;
+                if (username === user.username) {
+                    res.send({ success: false, message: replies.sameUser });
+                } else {
+                    dbOperations.findOne('User', 'username', username).then(result => {
+                        dbOperations.friendControl(user.id, result.user.id).then(result => {
+                            if (result === null) {
+                                res.send({ success:false, message: replies.notFound });
+                            } else {
+                                models.Friend.destroy({
+                                    returning: true,
+                                    where: {
+                                        id: result.id
+                                    }
+                                });
+                                res.send({ success: true, message: replies.friendDeleted });
+                            }
+                        });
+                    }).catch(error => {
+                        res.send(error);
+                    })
+                }
+            });
+        }
+    },
+    {
+        method: 'post',
         path: '/friendrequest/accept/:id(\\d+)',
         handler: (req, res) => {
             const token = req.headers[jwtConfig.tokenName];

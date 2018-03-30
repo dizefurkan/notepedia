@@ -22,5 +22,6 @@ export default {
     alreadySentARequest: "You are already sent a friend request!",
     successFriendshipRequest: "Friendship request was successfully sent.",
     acceptedFriendRequest: "Friend Request was accepted successfully.",
-    friendDeleted: "Friend delete process successfully done."
+    friendDeleted: "Friend delete process successfully done.",
+    youDonthavePermissionTo: "You don't have permission to "
 };

@@ -9,9 +9,9 @@ export default {
         return new Promise((resolve, reject) => {
             models[table].findOne( { where: { [field]: value }}).then(response => {
                 if (response) {
-                    resolve({ message: replies.found, found: true, user: response });
+                    resolve({ found: true, message: replies.found, data: response });
                 } else {
-                    resolve({ message: replies.notFound, found: false });
+                    resolve({ found: false, message: replies.notFound });
                 }
             });
         });
@@ -37,6 +37,23 @@ export default {
                 resolve({ data: response });
             }).catch(error => {
                 reject({ error: error });
+            });
+        });
+    },
+    getAllWithInclude: (table, key, value, modelName, asName) => {
+        return new Promise((resolve, reject) => {
+            models[table].findAll({
+                where: {
+                    [key]: value
+                },
+                include: [{
+                    model: models[modelName],
+                    as: asName
+                }]
+            }).then(response => {
+                resolve(response);
+            }).catch(error => {
+                reject(error);
             });
         });
     },
@@ -155,9 +172,54 @@ export default {
             }
         });
     },
+    checkSharedNote: (userId, noteId) => {
+        return new Promise((resolve, reject) => {
+            const Op = Sequelize.Op;
+            models.SharedNote.findOne({
+                where: {
+                    userId: userId,
+                    noteId: noteId
+                }
+            }).then(result => {
+                resolve(result);
+            })
+        });
+    },
+    getAllSharedNotesById: (id, filter) => {
+        return new Promise((resolve, reject) => {
+            let promise;
+            if (filter === 'owner') {
+                promise = models.SharedNote.findAll({
+                    include: [{
+                        model: models.Note,
+                        as: 'note',
+                        where: {
+                            userId: id
+                        }
+                    }]
+                })
+            } else {
+                promise = models.SharedNote.findAll({
+                    where: {
+                        userId: id
+                    },
+                    include: [{
+                        model: models.Note,
+                        as: 'note'
+                    }]
+                })
+            }
+            promise
+            .then(result => {
+                resolve(result);
+            }).catch(error => {
+                reject(error);
+            })
+        });
+    },
     verifyToken: (token) => {
         return new Promise((resolve, reject) => {
-            const verify = jwt.verify(token, jwtConfig.secretKey, (err, data) => {
+            jwt.verify(token, jwtConfig.secretKey, (err, data) => {
                 if (err) {
                     reject({ success: false, error: err });
                 } else {

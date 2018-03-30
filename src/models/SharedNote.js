@@ -22,7 +22,7 @@ export default (Sequelize, DataTypes) => {
 
     SharedNote.associate = (models) => {
         SharedNote.belongsTo(models.User, {
-            as: 'owner',
+            as: 'user',
             foreignKey: {
                 name: 'userId',
                 allowNull: false

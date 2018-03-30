@@ -11,8 +11,7 @@ app.use((req, res, next) => {
     } else {
         const token = req.headers[jwtConfig.tokenName];
         if (token) {
-            const checkToken = dbOperations.verifyToken(token);
-            checkToken.then(result => {
+            dbOperations.verifyToken(token).then(result => {
                 next();
             }).catch(err => {
                 res.send({ success: false, message: err });

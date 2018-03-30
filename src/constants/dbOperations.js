@@ -40,6 +40,24 @@ export default {
             });
         });
     },
+    findOneWithInclude: (table, key, value, modelName, asName) => {
+        return new Promise((resolve, reject) => {
+            models[table].findOne({
+                where: {
+                    [key]: value
+                },
+                include: [{
+                    model: models[modelName],
+                    as: asName,
+                    required: true
+                }]
+            }).then(response => {
+                resolve(response);
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    },
     getAllWithInclude: (table, key, value, modelName, asName) => {
         return new Promise((resolve, reject) => {
             models[table].findAll({
@@ -48,7 +66,8 @@ export default {
                 },
                 include: [{
                     model: models[modelName],
-                    as: asName
+                    as: asName,
+                    required: true
                 }]
             }).then(response => {
                 resolve(response);
@@ -188,7 +207,18 @@ export default {
     getAllSharedNotesById: (id, filter) => {
         return new Promise((resolve, reject) => {
             let promise;
-            if (filter === 'owner') {
+            if (filter === 'guest') {
+                promise = models.SharedNote.findAll({
+                    where: {
+                        userId: id
+                    },
+                    include: [{
+                        model: models.Note,
+                        as: 'note',
+                        required: true
+                    }]
+                })
+            } else {
                 promise = models.SharedNote.findAll({
                     include: [{
                         model: models.Note,
@@ -198,23 +228,11 @@ export default {
                         }
                     }]
                 })
-            } else {
-                promise = models.SharedNote.findAll({
-                    where: {
-                        userId: id
-                    },
-                    include: [{
-                        model: models.Note,
-                        as: 'note'
-                    }]
-                })
             }
             promise
             .then(result => {
                 resolve(result);
-            }).catch(error => {
-                reject(error);
-            })
+            });
         });
     },
     verifyToken: (token) => {

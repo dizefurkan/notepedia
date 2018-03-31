@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import Sequelize from 'sequelize';
 import dbOperations from './dbOperations';
 import { models } from '../models';
-import { jwtConfig, replies } from '../config';
+import { jwToken, replies } from '../config';
 
 export default {
     findOne: (table, field, value) => {
@@ -237,7 +237,7 @@ export default {
     },
     verifyToken: (token) => {
         return new Promise((resolve, reject) => {
-            jwt.verify(token, jwtConfig.secretKey, (err, data) => {
+            jwt.verify(token, jwToken.secretKey, (err, data) => {
                 if (err) {
                     reject({ success: false, error: err });
                 } else {

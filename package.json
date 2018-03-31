@@ -2,10 +2,10 @@
   "name": "notepedia",
   "version": "1.0.0",
   "description": "Create note. Add friend. Share it. That's it.",
-  "main": "app.js",
+  "main": "./src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js --exec babel-node --harmony"
+    "start": "nodemon ./src/app.js --exec babel-node --harmony"
   },
   "repository": {
     "type": "git",

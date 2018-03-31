@@ -2,7 +2,6 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import serverStatic from 'serve-static';
 import router from './router';
-
 import config from '../config';
 
 export default [

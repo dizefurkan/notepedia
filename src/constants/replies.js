@@ -1,5 +1,4 @@
 export default {
-    serverListening: "Server listening at localhost:",
     sameUser: "You can't add yourself as a friend",
     found: "Found",
     pageNotFound: "Page not found.",

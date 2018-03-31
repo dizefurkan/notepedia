@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import { jwtConfig, replies } from '../../config';
+import { jwToken } from '../../config';
 import { models } from '../../models';
-import { dbOperations } from '../../constants';
+import { dbOperations, replies } from '../../constants';
 
 export default [
     {
@@ -21,7 +21,7 @@ export default [
                     if (data.found) {
                         if (data.user.password === password) {
                             const user = data.user;
-                            const token = jwt.sign( { user }, jwtConfig.secretKey );
+                            const token = jwt.sign( { user }, jwToken.secretKey );
                             res.send({ success: true, message: replies.welcome, user: data.user, token: token });
                         } else {
                             res.send({ success: false, message: replies.wrongPassword });

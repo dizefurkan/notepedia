@@ -1,13 +1,13 @@
-import { jwtConfig, replies } from '../../config';
+import { jwToken } from '../../config';
 import { models } from '../../models';
-import { dbOperations } from '../../constants';
+import { dbOperations, replies } from '../../constants';
 
 export default [
     {
         method: 'post',
         path: '/friends/add/:username',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const { username } = req.params;
                 const sourceUser = result.identity.user;
@@ -48,7 +48,7 @@ export default [
         path: '/friends/delete/:username',
         handler: (req, res) => {
             const username = req.params.username;
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const user = result.identity.user;
                 if (username === user.username) {
@@ -79,7 +79,7 @@ export default [
         method: 'post',
         path: '/friendrequest/accept/:id(\\d+)',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const requestId = req.params.id;
                 const user = result.identity.user;
@@ -112,7 +112,7 @@ export default [
         method: 'post',
         path: '/friendrequest/refuse/:id(\\d+)',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const user = result.identity.user;
                 const requestId = req.params.id;
@@ -139,7 +139,7 @@ export default [
         method: 'get',
         path: '/friends',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const user = result.identity.user;
                 dbOperations.getAllFriends(user.id).then(result => {
@@ -156,7 +156,7 @@ export default [
         method: 'get',
         path: '/friendsrequests',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const user = result.identity.user;
                 dbOperations.getAllFriendsRequests(user.id).then(result => {

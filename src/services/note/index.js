@@ -1,14 +1,14 @@
 import Sequelize from 'sequelize';
 import { models } from '../../models';
-import { jwtConfig, replies } from '../../config';
-import { dbOperations } from '../../constants';
+import { jwToken } from '../../config';
+import { dbOperations, replies } from '../../constants';
 
 export default [
     {
         method: 'get',
         path: '/mynotes',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const user = result.identity.user;
                 dbOperations.getAllWithInclude('Note', 'userId', user.id, 'User', 'owner').then(result => {
@@ -50,7 +50,7 @@ export default [
         handler: (req, res) => {
             const { title, content } = req.body;
             if (title || content) {
-                const token = req.headers[jwtConfig.tokenName];
+                const token = req.headers[jwToken.name];
                 dbOperations.verifyToken(token).then(result => {
                     const { user } = result.identity;
                     dbOperations.findOne('Note', 'id', req.params.id).then(result => {
@@ -197,7 +197,7 @@ export default [
                 req.query.filterBy = "owner";
             }
             let filterBy = req.query.filterBy === '' ? 'owner' : req.query.filterBy;
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const user = result.identity.user;
                 dbOperations.getAllSharedNotesById(user.id, filterBy).then(result => {
@@ -214,7 +214,7 @@ export default [
         method: 'post',
         path: '/mynotes/shared/update/:id(\\d+)',
         handler: (req, res) => {
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const { id } = req.params;
                 const { canBeEdit, canBeDelete, noteId, userId } = req.body;
@@ -251,7 +251,7 @@ export default [
         path: '/mynotes/shared/delete/:id(\\d+)',
         handler: (req, res) => {
             const { id } = req.params;
-            const token = req.headers[jwtConfig.tokenName];
+            const token = req.headers[jwToken.name];
             dbOperations.verifyToken(token).then(result => {
                 const { user } = result.identity;
                 dbOperations.findOneWithInclude('SharedNote', 'id', id, 'Note', 'note').then(result => {

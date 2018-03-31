@@ -1,7 +1,7 @@
 import express from 'express';
 import services from '../services';
-import { jwtConfig, replies } from '../config';
-import dbOperations from '../constants/dbOperations';
+import { jwtToken } from '../config';
+import { dbOperations, replies } from '../constants';
 
 const app = express();
 
@@ -9,7 +9,7 @@ app.use((req, res, next) => {
     if (req.path === '/register' || req.path === '/login') {
         next();
     } else {
-        const token = req.headers[jwtConfig.tokenName];
+        const token = req.headers[jwtToken.name];
         if (token) {
             dbOperations.verifyToken(token).then(result => {
                 next();

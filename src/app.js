@@ -1,6 +1,7 @@
 import express from 'express';
-import expressCore from './src/core/express';
-import { server, replies } from './src/config';
+import expressCore from './core/express';
+import { server } from './config';
+import { replies } from './constants';
 
 const app = express();
 
@@ -10,6 +11,6 @@ app.listen(server.port, (err) => {
     if (err) {
         console.log(err);
     } else {
-        console.log(replies.serverListening, server.port);
+        console.log(server.port);
     }
 });

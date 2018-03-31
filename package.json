@@ -4,7 +4,7 @@
   "description": "Create note. Add friend. Share it. That's it.",
   "main": "./src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/eslint ./",
     "start": "nodemon ./src/app.js --exec babel-node --harmony"
   },
   "repository": {
@@ -31,6 +31,12 @@
     "serve-static": "^1.13.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0"
+    "babel-cli": "^6.26.0",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.0.1"
   }
 }

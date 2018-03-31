@@ -1,3 +1,3 @@
-export default { 
-    port: 3030
-};
+export default {
+  port: 3030
+}

@@ -1,4 +1,4 @@
 export default {
-    secretKey: 'notepediaJWT',
-    name: 'token'
-};
+  secretKey: 'notepediaJWT',
+  name: 'token'
+}

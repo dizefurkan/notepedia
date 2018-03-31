@@ -1,3 +1,3 @@
-import { morgan } from '../config';
+import { morgan } from '../config'
 
-export default morgan;
+export default morgan

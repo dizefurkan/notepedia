@@ -24,7 +24,7 @@ export default [
     path: '/users',
     handler: (req, res) => {
       dbo.common.getAll('User').then(response => {
-        const userlist = []
+        const userlist = [];
         response.data.forEach(item => {
           userlist.push(item.id + ' ' + item.username + ' ' + item.password);
         })

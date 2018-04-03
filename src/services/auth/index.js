@@ -54,7 +54,7 @@ export default [
             const emailFind = dbo.common.findOne('User', 'email', email);
             emailFind.then(data => {
               if (!data.found) {
-                models.User.create({
+                models.user.create({
                   username: username,
                   email: email,
                   password: password,

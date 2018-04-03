@@ -1,7 +1,14 @@
-import morgan from './morgan'
-import serverStatic from './serverStatic'
-import server from './server'
-import jwToken from './jwt'
+import fs from 'fs';
+const configs = {};
 
-export { morgan, serverStatic, server, jwToken }
-export default { morgan, serverStatic, server, jwToken }
+fs
+  .readdirSync(__dirname)
+  .filter(file => ((file.indexOf('.') !== 0) && (file !== 'index.js')))
+  .forEach(file => {
+    const name = file.replace('.js', '');
+    const config = require('./' + file).default;
+    configs[name] = config;
+  });
+
+export { configs };
+export default { configs };

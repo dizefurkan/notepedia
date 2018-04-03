@@ -1,37 +1,38 @@
-import jwt from 'jsonwebtoken'
-import { jwToken } from '../../config'
-import { models } from '../../models'
-import { dbOperations, replies } from '../../constants'
+import jwt from 'jsonwebtoken';
+import jwToken from '../../config/jwToken';
+import replies from '../../constants/replies';
+import { models } from '../../models';
+import { dbo } from '../../libraries';
 
 export default [
   {
     method: 'get',
     path: '/login',
     handler: (req, res) => {
-      res.send('login get')
+      res.send('login get');
     }
   },
   {
     method: 'post',
     path: '/login',
     handler: (req, res) => {
-      const { username, password } = req.body
+      const { username, password } = req.body;
       if (username && password) {
-        dbOperations.findOne('User', 'username', username).then(data => {
-          if (data.found) {
-            if (data.user.password === password) {
-              const user = data.user
-              const token = jwt.sign({ user }, jwToken.secretKey)
-              res.send({ success: true, message: replies.welcome, user: data.user, token: token })
+        dbo.common.findOne('User', 'username', username).then(result => {
+          if (result.found) {
+            const { data } = result;
+            if (data.password === password) {
+              const token = jwt.sign({ data }, jwToken.secretKey);
+              res.send({ success: true, message: replies.welcome, user: data.user, token: token });
             } else {
-              res.send({ success: false, message: replies.wrongPassword })
+              res.send({ success: false, message: replies.wrongPassword });
             }
           } else {
-            res.send({ success: false, message: replies.notFound })
+            res.send({ success: false, message: replies.notFound });
           }
         })
       } else {
-        res.send({ success: false, message: replies.fillRequiredfields })
+        res.send({ success: false, message: replies.fillRequiredfields });
       }
     }
   },
@@ -39,18 +40,18 @@ export default [
     method: 'get',
     path: '/register',
     handler: (req, res) => {
-      res.send('register get')
+      res.send('register get');
     }
   },
   {
     method: 'post',
     path: '/register',
     handler: (req, res) => {
-      const { username, email, password, name, surname } = req.body
+      const { username, email, password, name, surname } = req.body;
       if (username && email && password && name && surname) {
-        dbOperations.findOne('User', 'username', username).then(data => {
+        dbo.common.findOne('User', 'username', username).then(data => {
           if (!data.found) {
-            const emailFind = dbOperations.findOne('User', 'email', email)
+            const emailFind = dbo.common.findOne('User', 'email', email);
             emailFind.then(data => {
               if (!data.found) {
                 models.User.create({
@@ -65,24 +66,33 @@ export default [
                     success: true,
                     message: replies.registerSuccess,
                     data: result
-                  })
+                  });
                 }).catch((error) => {
                   res.send({
                     success: false,
                     message: error
-                  })
+                  });
                 })
               } else {
-                res.send({ success: false, message: replies.thisEmail + replies.alreadyHave })
+                res.send({
+                  success: false,
+                  message: replies.thisEmail + replies.alreadyHave
+                });
               }
             })
           } else {
-            res.send({ success: false, message: replies.thisUsername + replies.alreadyHave })
+            res.send({
+              success: false,
+              message: replies.thisUsername + replies.alreadyHave
+            });
           }
-        })
+        });
       } else {
-        res.send({ success: false, message: replies.fillRequiredfields })
+        res.send({
+          success: false,
+          message: replies.fillRequiredfields
+        });
       }
     }
   }
-]
+];

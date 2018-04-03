@@ -1,57 +1,66 @@
-import { jwToken } from '../../config'
-import { models } from '../../models'
-import { dbOperations, replies } from '../../constants'
+import { dbo } from '../../libraries';
+import { models } from '../../models';
+import jwToken from '../../config/jwToken';
+import replies from '../../constants/replies';
 
 export default [
   {
     method: 'post',
     path: '/friends/add/:username',
     handler: (req, res) => {
-      const token = req.headers[jwToken.name]
-      dbOperations.verifyToken(token).then(result => {
-        const { username } = req.params
-        const sourceUser = result.identity.user
+      const token = req.headers[jwToken.name];
+      dbo.verifyToken(token).then(result => {
+        const { username } = req.params;
+        const sourceUser = result.identity.user;
         if (username === sourceUser.username) {
           res.send({
-            success: false, message: replies.sameUser
-          })
+            success: false,
+            message: replies.sameUser
+          });
         } else {
-          dbOperations.findOne('User', 'username', username).then(result => {
-            const targetUser = result.user
-            dbOperations.friendControl(sourceUser.id, targetUser.id).then(result => {
+          dbo.common.findOne('User', 'username', username).then(result => {
+            const targetUser = result.user;
+            dbo.friend.control(sourceUser.id, targetUser.id).then(result => {
               if (result === null) {
-                dbOperations.friendRequestControl(sourceUser.id, targetUser.id).then(result => {
+                dbo.friendRequest.control(sourceUser.id, targetUser.id).then(result => {
                   if (result === null) {
                     models.FriendsRequest.create({
                       sourceId: sourceUser.id,
                       targetId: targetUser.id
                     }).then(result => {
                       res.send({
-                        success: true, message: replies.successFriendshipRequest, data: result
-                      })
+                        success: true,
+                        message: replies.successFriendshipRequest,
+                        data: result
+                      });
                     }).catch(error => {
                       res.send({
-                        success: false, error: error
-                      })
-                    })
+                        success: false,
+                        error: error
+                      });
+                    });
                   } else {
                     res.send({
-                      success: false, message: replies.alreadySentARequest, data: result
-                    })
+                      success: false,
+                      message: replies.alreadySentARequest,
+                      data: result
+                    });
                   }
-                })
+                });
               } else {
                 res.send({
-                  success: false, message: replies.alreadyFriends, data: result
-                })
+                  success: false,
+                  message: replies.alreadyFriends,
+                  data: result
+                });
               }
-            })
+            });
           }).catch(error => {
             res.send({
               success: false,
               message: replies.notFound
-            })
-          })
+            });
+          });
         }
       })
     }
@@ -62,34 +71,37 @@ export default [
     handler: (req, res) => {
       const username = req.params.username
       const token = req.headers[jwToken.name]
-      dbOperations.verifyToken(token).then(result => {
-        const user = result.identity.user
+      dbo.verifyToken(token).then(result => {
+        const user = result.identity.user;
         if (username === user.username) {
           res.send({
-            success: false, message: replies.sameUser
-          })
+            success: false,
+            message: replies.sameUser
+          });
         } else {
-          dbOperations.findOne('User', 'username', username).then(result => {
-            dbOperations.friendControl(user.id, result.user.id).then(result => {
+          dbo.common.findOne('User', 'username', username).then(result => {
+            dbo.friend.control(user.id, result.user.id).then(result => {
               if (result === null) {
                 res.send({
-                  success: false, message: replies.notFound
-                })
+                  success: false,
+                  message: replies.notFound
+                });
               } else {
                 models.Friend.destroy({
                   returning: true,
                   where: {
                     id: result.id
                   }
-                })
+                });
                 res.send({
-                  success: true, message: replies.friendDeleted
-                })
+                  success: true,
+                  message: replies.friendDeleted
+                });
               }
-            })
+            });
           }).catch(error => {
-            res.send(error)
-          })
+            res.send(error);
+          });
         }
       })
     }
@@ -102,7 +114,7 @@ export default [
       dbOperations.verifyToken(token).then(result => {
         const requestId = req.params.id
         const user = result.identity.user
-        dbOperations.checkFriendRequestwithId('accept', requestId, user.id).then(result => {
+        dbo.friendRequest.checkWithId('accept', requestId, user.id).then(result => {
           if (result === null) {
             res.send({
               success: false, message: replies.noRecord
@@ -135,14 +147,15 @@ export default [
     method: 'post',
     path: '/friendrequest/refuse/:id(\\d+)',
     handler: (req, res) => {
-      const token = req.headers[jwToken.name]
-      dbOperations.verifyToken(token).then(result => {
+      const token = req.headers[jwToken.name];
+      dbo.verifyToken(token).then(result => {
         const user = result.identity.user
         const requestId = req.params.id
-        dbOperations.checkFriendRequestwithId('refuse', requestId, user.id).then(result => {
+        dbo.friendRequest.checkWithId('refuse', requestId, user.id).then(result => {
           if (result === null) {
             res.send({
-              success: false, message: replies.noRecord
+              success: false,
+              message: replies.noRecord
             })
           } else {
             models.FriendsRequest.destroy({
@@ -166,17 +179,17 @@ export default [
     method: 'get',
     path: '/friends',
     handler: (req, res) => {
-      const token = req.headers[jwToken.name]
-      dbOperations.verifyToken(token).then(result => {
-        const user = result.identity.user
-        dbOperations.getAllFriends(user.id).then(result => {
-          res.send(result)
+      const token = req.headers[jwToken.name];
+      dbo.verifyToken(token).then(result => {
+        const user = result.identity.user;
+        dbo.friend.getAll(user.id).then(result => {
+          res.send(result);
         }).catch(error => {
           res.send(error)
-        })
+        });
       }).catch(error => {
-        res.send(error)
-      })
+        res.send(error);
+      });
     }
   },
   {
@@ -184,22 +197,22 @@ export default [
     path: '/friendsrequests',
     handler: (req, res) => {
       const token = req.headers[jwToken.name]
-      dbOperations.verifyToken(token).then(result => {
+      dbo.verifyToken(token).then(result => {
         const user = result.identity.user
-        dbOperations.getAllFriendsRequests(user.id).then(result => {
+        dbo.friendRequest.getAll(user.id).then(result => {
           if (result.length) {
-            res.send(result)
+            res.send(result);
           } else {
             res.send({
               message: replies.noRequest
-            })
+            });
           }
         }).catch(error => {
-          res.send(error)
-        })
+          res.send(error);
+        });
       }).catch(error => {
-        res.send(error)
-      })
+        res.send(error);
+      });
     }
   }
-]
+];

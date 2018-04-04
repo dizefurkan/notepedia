@@ -2,7 +2,7 @@
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('Notes',
+    return queryInterface.createTable('SharedNotes',
       {
         id: {
           type: Sequelize.INTEGER,
@@ -18,17 +18,27 @@ module.exports = {
         deletedAt: {
           type: Sequelize.DATE
         },
-        title: {
-          type: Sequelize.STRING,
+        canBeEdit: {
+          type: Sequelize.BOOLEAN,
           allowNull: false
         },
-        content: {
-          type: Sequelize.TEXT
+        canBeDelete: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false
         },
         userId: {
           type: Sequelize.INTEGER,
+          allowNull: false,
           references: {
             model: 'Users',
+            key: 'id'
+          }
+        },
+        noteId: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'Notes',
             key: 'id'
           }
         }
@@ -37,6 +47,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-    return queryInterface.dropTable('Notes');
+    return queryInterface.dropTable('SharedNotes');
   }
 };

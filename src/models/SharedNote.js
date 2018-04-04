@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var SharedNote = Sequelize.define('SharedNote',
     {
@@ -16,9 +18,9 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
-  )
+  );
 
   SharedNote.associate = (models) => {
     SharedNote.belongsTo(models.User, {
@@ -27,7 +29,7 @@ export default (Sequelize, DataTypes) => {
         name: 'userId',
         allowNull: false
       }
-    })
+    });
 
     SharedNote.belongsTo(models.Note, {
       as: 'note',
@@ -35,7 +37,7 @@ export default (Sequelize, DataTypes) => {
         name: 'noteId',
         allowNull: false
       }
-    })
-  }
-  return SharedNote
+    });
+  };
+  return SharedNote;
 }

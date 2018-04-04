@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var FriendsRequest = Sequelize.define('FriendsRequest',
     {
@@ -8,9 +10,9 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
-  )
+  );
 
   FriendsRequest.associate = (models) => {
     FriendsRequest.belongsTo(models.User, {
@@ -19,7 +21,7 @@ export default (Sequelize, DataTypes) => {
         name: 'sourceId',
         allowNull: false
       }
-    })
+    });
 
     FriendsRequest.belongsTo(models.User, {
       as: 'target',
@@ -27,7 +29,7 @@ export default (Sequelize, DataTypes) => {
         name: 'targetId',
         allowNull: false
       }
-    })
-  }
-  return FriendsRequest
-}
+    });
+  };
+  return FriendsRequest;
+};

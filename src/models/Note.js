@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var Note = Sequelize.define('Note',
     {
@@ -15,7 +17,7 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
   )
 
@@ -26,25 +28,25 @@ export default (Sequelize, DataTypes) => {
         name: 'userId',
         allowNull: false
       }
-    })
+    });
 
     Note.hasMany(models.NoteComment, {
       as: 'noteComment',
       foreignKey: 'noteId',
       sourceKey: 'id'
-    })
+    });
 
     Note.hasMany(models.SharedNote, {
       as: 'sharedNote',
       foreignKey: 'noteId',
       sourceKey: 'id'
-    })
+    });
 
     Note.hasMany(models.PublishedNote, {
       as: 'publishedNote',
       foreignKey: 'noteId',
       sourceKey: 'id'
-    })
-  }
-  return Note
-}
+    });
+  };
+  return Note;
+};

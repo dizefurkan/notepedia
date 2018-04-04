@@ -24,7 +24,7 @@ export default [
               if (result === null) {
                 dbo.friendRequest.control(sourceUser.id, targetUser.id).then(result => {
                   if (result === null) {
-                    models.friendsRequest.create({
+                    models.FriendsRequest.create({
                       sourceId: sourceUser.id,
                       targetId: targetUser.id
                     }).then(result => {
@@ -87,7 +87,7 @@ export default [
                   message: replies.notFound
                 });
               } else {
-                models.friend.destroy({
+                models.Friend.destroy({
                   returning: true,
                   where: {
                     id: result.id
@@ -120,13 +120,13 @@ export default [
               success: false, message: replies.noRecord
             })
           } else {
-            models.friendsRequest.destroy({
+            models.FriendsRequest.destroy({
               returning: true,
               where: {
                 id: requestId
               }
             })
-            models.friend.create({
+            models.Friend.create({
               senderId: result.sourceId,
               acceptorId: user.id
             }).then(result => {
@@ -158,7 +158,7 @@ export default [
               message: replies.noRecord
             })
           } else {
-            models.friendsRequest.destroy({
+            models.FriendsRequest.destroy({
               returning: true,
               where: {
                 id: requestId
@@ -198,7 +198,7 @@ export default [
     handler: (req, res) => {
       const token = req.headers[jwToken.name]
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user
+        const user = result.identity.user;
         dbo.friendRequest.getAll(user.id).then(result => {
           if (result.length) {
             res.send(result);

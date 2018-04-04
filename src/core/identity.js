@@ -1,5 +1,6 @@
 import jwToken from '../config/jwToken';
 import { dbo } from '../libraries';
+import replies from '../constants/replies';
 
 export default (req, res, next) => {
   if (req.path === '/register' || req.path === '/login') {
@@ -13,7 +14,11 @@ export default (req, res, next) => {
         res.send(error);
       });
     } else {
-      res.send({ success: false, message: replies.noToken, url: req.path });
+      res.send({
+        success: false,
+        message: replies.noToken,
+        url: req.path
+      });
     }
   }
 };

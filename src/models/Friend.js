@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var Friend = Sequelize.define('Friend',
     {
@@ -8,9 +10,9 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
-  )
+  );
 
   Friend.associate = (models) => {
     Friend.belongsTo(models.User, {
@@ -28,6 +30,6 @@ export default (Sequelize, DataTypes) => {
         allowNull: false
       }
     })
-  }
-  return Friend
-}
+  };
+  return Friend;
+};

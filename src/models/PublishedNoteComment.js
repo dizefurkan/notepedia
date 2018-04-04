@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var PublishedNoteComment = Sequelize.define('PublishedNoteComment',
     {
@@ -12,9 +14,9 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
-  )
+  );
 
   PublishedNoteComment.associate = (models) => {
     PublishedNoteComment.belongsTo(models.PublishedNote, {
@@ -32,6 +34,6 @@ export default (Sequelize, DataTypes) => {
         allowNull: false
       }
     })
-  }
-  return PublishedNoteComment
-}
+  };
+  return PublishedNoteComment;
+};

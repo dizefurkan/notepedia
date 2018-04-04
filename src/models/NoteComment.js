@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var NoteComment = Sequelize.define('NoteComment',
     {
@@ -12,9 +14,9 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
-  )
+  );
 
   NoteComment.associate = (models) => {
     NoteComment.belongsTo(models.User, {
@@ -23,7 +25,7 @@ export default (Sequelize, DataTypes) => {
         name: 'userId',
         allowNull: false
       }
-    })
+    });
 
     NoteComment.belongsTo(models.Note, {
       as: 'note',
@@ -31,7 +33,7 @@ export default (Sequelize, DataTypes) => {
         name: 'noteId',
         allowNull: false
       }
-    })
-  }
-  return NoteComment
-}
+    });
+  };
+  return NoteComment;
+};

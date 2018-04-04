@@ -1,3 +1,5 @@
+import config from '../config/models';
+
 export default (Sequelize, DataTypes) => {
   var User = Sequelize.define('User',
     {
@@ -36,65 +38,64 @@ export default (Sequelize, DataTypes) => {
       }
     },
     {
-      paranoid: true
+      paranoid: config.paranoid
     }
-  )
+  );
 
   User.associate = (models) => {
     User.hasMany(models.Note, {
       as: 'note',
       foreignKey: 'userId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.NoteComment, {
       as: 'noteComment',
       foreignKey: 'userId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.SharedNote, {
       as: 'sharedNote',
       foreignKey: 'userId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.PublishedNote, {
       as: 'publishedNote',
       foreignKey: 'userId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.PublishedNoteComment, {
       as: 'publishedNoteComment',
       foreignKey: 'userId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.Friend, {
       as: 'friendSender',
       foreignKey: 'senderId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.Friend, {
       as: 'friendAcceptor',
       foreignKey: 'acceptorId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.FriendsRequest, {
       as: 'friendRequestSource',
       foreignKey: 'sourceId',
       sourceKey: 'id'
-    })
+    });
 
     User.hasMany(models.FriendsRequest, {
       as: 'friendRequestTarget',
       foreignKey: 'targetId',
       sourceKey: 'id'
-    })
-  }
-
-  return User
-}
+    });
+  };
+  return User;
+};

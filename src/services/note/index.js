@@ -30,7 +30,7 @@ export default [
         const token = req.headers['token'];
         dbo.verifyToken(token).then(result => {
           const user = result.identity.user;
-          models.note.create({
+          models.Note.create({
             title: title,
             content: content,
             userId: user.id
@@ -41,7 +41,7 @@ export default [
           });
         }).catch(error => {
           res.send({
-            error: error
+            error: 'hahah'
           });
         });
       } else {
@@ -63,7 +63,7 @@ export default [
           const { user } = result.identity;
           dbo.common.findOne('Note', 'id', req.params.id).then(result => {
             if (result.data.userId === user.id) {
-              models.note.update(req.body, {
+              models.Note.update(req.body, {
                 where: {
                   id: req.params.id
                 }
@@ -74,7 +74,7 @@ export default [
                 })
               })
             } else {
-              models.sharedNote.findOne({
+              models.SharedNote.findOne({
                 where: {
                   userId: user.id,
                   noteId: req.params.id
@@ -127,7 +127,7 @@ export default [
         const user = result.identity.user;
         dbo.common.findOne('Note', 'id', req.params.id).then(result => {
           if (result.data.userId === user.id) {
-            models.note.destroy({
+            models.Note.destroy({
               returning: true,
               where: {
                 userId: user.id,
@@ -141,7 +141,7 @@ export default [
               });
             });
           } else {
-            models.sharedNote.findOne({
+            models.SharedNote.findOne({
               where: {
                 noteId: req.params.id,
                 userId: user.id,
@@ -155,7 +155,7 @@ export default [
                 });
               } else {
                 if (result.canBeDelete) {
-                  models.note.destroy({
+                  models.Note.destroy({
                     returning: true,
                     where: {
                       id: req.params.id
@@ -202,7 +202,7 @@ export default [
                   if (result.data.userId === user.id) {
                     dbo.sharedNote.check(reqUser.id, noteId).then(result => {
                       if (result === null) {
-                        models.sharedNote.create({
+                        models.SharedNote.create({
                           canBeEdit: canEdit,
                           canBeDelete: canDelete,
                           userId: reqUser.id,
@@ -342,7 +342,7 @@ export default [
             }
 
             if (control.found && control.isHavePermission) {
-              models.sharedNote.destroy(
+              models.SharedNote.destroy(
                 {
                   returning: true,
                   where: {

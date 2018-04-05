@@ -36,7 +36,7 @@ export default [
         res.send({
           error: error
         });
-      })
+      });
     }
   }
 ];

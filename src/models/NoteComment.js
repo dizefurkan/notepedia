@@ -1,7 +1,7 @@
 import config from '../config/models';
 
 export default (Sequelize, DataTypes) => {
-  var NoteComment = Sequelize.define('NoteComment',
+  const NoteComment = Sequelize.define('NoteComment',
     {
       id: {
         type: DataTypes.INTEGER,

@@ -1,7 +1,7 @@
 import config from '../config/models';
 
 export default (Sequelize, DataTypes) => {
-  var PublishedNote = Sequelize.define('PublishedNote',
+  const PublishedNote = Sequelize.define('PublishedNote',
     {
       id: {
         type: DataTypes.INTEGER,

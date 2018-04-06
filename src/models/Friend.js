@@ -1,7 +1,7 @@
 import config from '../config/models';
 
 export default (Sequelize, DataTypes) => {
-  var Friend = Sequelize.define('Friend',
+  const Friend = Sequelize.define('Friend',
     {
       id: {
         type: DataTypes.INTEGER,

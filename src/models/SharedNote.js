@@ -1,7 +1,7 @@
 import config from '../config/models';
 
 export default (Sequelize, DataTypes) => {
-  var SharedNote = Sequelize.define('SharedNote',
+  const SharedNote = Sequelize.define('SharedNote',
     {
       id: {
         type: DataTypes.INTEGER,

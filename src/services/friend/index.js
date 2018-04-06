@@ -11,7 +11,7 @@ export default [
       const token = req.headers[jwToken.name];
       dbo.verifyToken(token).then(result => {
         const { username } = req.params;
-        const sourceUser = result.identity.user;
+        const sourceUser = result.data;
         if (username === sourceUser.username) {
           res.send({
             success: false,
@@ -72,7 +72,7 @@ export default [
       const username = req.params.username
       const token = req.headers[jwToken.name]
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         if (username === user.username) {
           res.send({
             success: false,
@@ -112,7 +112,7 @@ export default [
     handler: (req, res) => {
       const token = req.headers[jwToken.name];
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         dbo.friend.getAll(user.id).then(result => {
           res.send(result);
         }).catch(error => {

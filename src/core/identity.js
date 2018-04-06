@@ -9,7 +9,17 @@ export default (req, res, next) => {
     const token = req.headers[jwToken.name];
     if (token) {
       dbo.verifyToken(token).then(result => {
-        next();
+        if (result.hasOwnProperty('data')) {
+          dbo.common.findOne('User', 'id', result.data.id).then(result => {
+            if (result.found) {
+              next();
+            } else {
+              res.send({ success: false, message: replies.incorrectToken})
+            }
+          });
+        } else {
+          res.send({ success: false, message: replies.incorrectToken})
+        }
       }).catch(error => {
         res.send(error);
       });

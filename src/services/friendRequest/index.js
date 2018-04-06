@@ -10,8 +10,8 @@ export default [
     handler: (req, res) => {
       const token = req.headers[jwToken.name]
       dbo.verifyToken(token).then(result => {
-        const requestId = req.params.id
-        const user = result.identity.user
+        const requestId = req.params.id;
+        const user = result.data;
         dbo.friendRequest.checkWithId('accept', requestId, user.id).then(result => {
           if (result === null) {
             res.send({
@@ -47,8 +47,8 @@ export default [
     handler: (req, res) => {
       const token = req.headers[jwToken.name];
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user
-        const requestId = req.params.id
+        const user = result.data;
+        const requestId = req.params.id;
         dbo.friendRequest.checkWithId('refuse', requestId, user.id).then(result => {
           if (result === null) {
             res.send({
@@ -79,7 +79,7 @@ export default [
     handler: (req, res) => {
       const token = req.headers[jwToken.name]
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         dbo.friendRequest.getAll(user.id).then(result => {
           if (result.length) {
             res.send(result);

@@ -10,7 +10,7 @@ export default [
     handler: (req, res) => {
       const token = req.headers[jwToken.name];
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         dbo.common.getAllWithInclude('Note', 'userId', user.id, 'User', 'owner').then(result => {
           res.send(result);
         }).catch(error => {
@@ -29,7 +29,7 @@ export default [
       if (title || content) {
         const token = req.headers['token'];
         dbo.verifyToken(token).then(result => {
-          const user = result.identity.user;
+          const user = result.data;
           models.Note.create({
             title: title,
             content: content,
@@ -60,7 +60,7 @@ export default [
       if (title || content) {
         const token = req.headers[jwToken.name];
         dbo.verifyToken(token).then(result => {
-          const { user } = result.identity;
+          const user = result.data;
           dbo.common.findOne('Note', 'id', req.params.id).then(result => {
             if (result.data.userId === user.id) {
               models.Note.update(req.body, {
@@ -124,7 +124,7 @@ export default [
     handler: (req, res) => {
       const token = req.headers['token'];
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         dbo.common.findOne('Note', 'id', req.params.id).then(result => {
           if (result.data.userId === user.id) {
             models.Note.destroy({

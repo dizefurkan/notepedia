@@ -6,6 +6,7 @@ export default {
   noRecord: 'No record',
   noRequest: 'No request',
   noToken: 'No token',
+  incorrectToken: 'Incorrect Token',
   welcome: 'Welcome',
   wrongPassword: 'Wrong Password',
   registerSuccess: 'Register Successful',

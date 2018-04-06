@@ -10,7 +10,7 @@ export default [
     handler: (req, res) => {
       const token = req.headers['token'];
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         const { username, noteId, canEdit, canDelete } = req.query;
         if (username === user.username) {
           res.send({
@@ -67,7 +67,7 @@ export default [
       let filterBy = req.query.filterBy === '' ? 'owner' : req.query.filterBy;
       const token = req.headers[jwToken.name];
       dbo.verifyToken(token).then(result => {
-        const user = result.identity.user;
+        const user = result.data;
         dbo.sharedNote.getAllById(user.id, filterBy).then(result => {
           if (!result[0]) {
             res.send({

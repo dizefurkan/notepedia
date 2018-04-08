@@ -15,24 +15,22 @@ export default [
   {
     method: 'post',
     path: '/login',
-    handler: (req, res) => {
-      const { username, password } = req.body;
-      if (username && password) {
-        dbo.common.findOne('User', 'username', username).then(result => {
-          if (result.found) {
-            const { data } = result;
-            if (data.password === password) {
-              const token = jwt.sign({ data }, jwToken.secretKey);
-              res.send({ success: true, message: replies.welcome, user: data.user, token: token });
-            } else {
-              res.send({ success: false, message: replies.wrongPassword });
+    handler: async (req, res) => {
+      try {
+        const { username, password } = req.body;
+        if (username && password) {
+          const query = {
+            where: {
+              username
             }
-          } else {
-            res.send({ success: false, message: replies.notFound });
           }
-        })
-      } else {
-        res.send({ success: false, message: replies.fillRequiredfields });
+          const data = await dbo.common.findOne(models.User, query);
+          res.send(data);
+        } else {
+          res.send({ success: false, message: replies.fillRequiredfields });
+        }
+      } catch (err) {
+        res.send(err);
       }
     }
   },

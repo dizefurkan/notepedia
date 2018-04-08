@@ -2,17 +2,23 @@ import { models } from '../models';
 import replies from './';
 
 export default {
-  findOne: (table, field, value) => {
-    return new Promise((resolve, reject) => {
-      models[table].findOne({ where: { [field]: value } }).then(response => {
-        if (response) {
-          resolve({ found: true, message: replies.found, data: response });
-        } else {
-          resolve({ found: false, message: replies.notFound });
-        }
-      });
+  findOne: async (model, query) => {
+    const data = await model.findOne({
+      ...query
     });
+    return data;
   },
+  // findOne: (table, field, value) => {
+  //   return new Promise((resolve, reject) => {
+  //     models[table].findOne({ where: { [field]: value } }).then(response => {
+  //       if (response) {
+  //         resolve({ found: true, message: replies.found, data: response });
+  //       } else {
+  //         resolve({ found: false, message: replies.notFound });
+  //       }
+  //     });
+  //   });
+  // },
   getAll: (table) => {
     return new Promise((resolve, reject) => {
       models[table].findAll().then(response => {

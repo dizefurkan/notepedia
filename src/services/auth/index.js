@@ -1,8 +1,11 @@
-import replies from '../../constants/replies';
+import jwt from 'jsonwebtoken';
+import Joi from 'joi';
+import jwToken from '../../config/jwToken';
+import { constants } from '../../constants';
 import { models } from '../../models';
 import { dbo } from '../../libraries';
-import jwt from 'jsonwebtoken';
-import jwToken from '../../config/jwToken';
+
+const { replies } = constants;
 
 export default [
   {
@@ -49,6 +52,14 @@ export default [
       try {
         let query = {};
         const { username, email, password, name, surname } = req.body;
+        const schema = Joi.object().keys({
+          username: Joi.string().alphanum().min(3).max(30).required(),
+          password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required(),
+          name: Joi.string().min(3).max(30).required(),
+          surname: Joi.string().min(3).max(30).required(),
+          email: Joi.string().email()
+        });
+        let result = await Joi.validate({...req.body}, schema);
         if (username && email && password && name && surname) {
           query = {
             where: {
@@ -64,7 +75,7 @@ export default [
             };
             data = await dbo.common.findOne(models.User, query);
             if (!data.found) {
-              const result = await models.User.create({
+              result = await models.User.create({
                 username: username,
                 email: email,
                 password: password,

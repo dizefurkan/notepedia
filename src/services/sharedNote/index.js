@@ -29,49 +29,57 @@ export default [
             result = await dbo.common.findOne(models.User, query);
             if (result.found) {
               const reqUser = result.data;
-              query = {
-                where: {
-                  id: noteId
-                }
-              };
-              result = await dbo.common.findOne(models.Note, query);
-              if (!result.found) {
+              result = await dbo.friend.control(user.id, reqUser.id);
+              if (result === null) {
                 res.send({
                   success: false,
-                  message: 'Note ' + replies.notFound
-                });
+                  message: replies.youCanOnlyShareWithYourFriend
+                })
               } else {
-                if (result.data.userId === user.id) {
-                  const query = {
-                    where: {
-                      userId: reqUser.id,
-                      noteId: noteId
-                    }
-                  };
-                  result = await dbo.common.findOne(models.SharedNote, query);
-                  if (result.found) {
-                    res.send({
-                      success: false,
-                      message: replies.alreadyHave
-                    });
-                  } else {
-                    result = await models.SharedNote.create({
-                      canBeEdit: canEdit,
-                      canBeDelete: canDelete,
-                      userId: reqUser.id,
-                      noteId: noteId
-                    })
-                    res.send({
-                      success: true,
-                      message: replies.successful,
-                      data: result
-                    });
+                query = {
+                  where: {
+                    id: noteId
                   }
-                } else {
+                };
+                result = await dbo.common.findOne(models.Note, query);
+                if (!result.found) {
                   res.send({
                     success: false,
                     message: 'Note ' + replies.notFound
                   });
+                } else {
+                  if (result.data.userId === user.id) {
+                    const query = {
+                      where: {
+                        userId: reqUser.id,
+                        noteId: noteId
+                      }
+                    };
+                    result = await dbo.common.findOne(models.SharedNote, query);
+                    if (result.found) {
+                      res.send({
+                        success: false,
+                        message: replies.alreadyHave
+                      });
+                    } else {
+                      result = await models.SharedNote.create({
+                        canBeEdit: canEdit,
+                        canBeDelete: canDelete,
+                        userId: reqUser.id,
+                        noteId: noteId
+                      })
+                      res.send({
+                        success: true,
+                        message: replies.successful,
+                        data: result
+                      });
+                    }
+                  } else {
+                    res.send({
+                      success: false,
+                      message: 'Note ' + replies.notFound
+                    });
+                  }
                 }
               }
             } else {
@@ -185,23 +193,30 @@ export default [
         const { id } = req.params;
         const token = req.headers[jwToken.name];
         let result = await dbo.verifyToken(token);
-        const { user } = result.identity;
+        const user = result.data;
         const query = {
           where: {
             id
           },
-          include: [{
-            model: 'Note',
-            as: 'note',
-            required: true
-          }]
+          include: [
+            {
+              model: models.User,
+              as: 'user',
+              required: true
+            },
+            {
+              model: models.Note,
+              as: 'note',
+              required: true
+            }
+          ]
         };
         result = await dbo.common.findOneWithInclude(models.SharedNote, query);
         if (result === null) {
           res.send({
             success: false,
             message: replies.notFound
-          })
+          });
         } else {
           let control = {};
           if (result.note.userId === user.id) {
@@ -224,14 +239,12 @@ export default [
             });
           }
           if (control.found && control.isHavePermission) {
-            await models.SharedNote.destroy(
-              {
-                returning: true,
-                where: {
-                  id: id
-                }
+            await models.SharedNote.destroy({
+              returning: true,
+              where: {
+                id
               }
-            )
+            });
             res.send({
               success: true,
               message: 'Shared Note' + replies.wasDeleted

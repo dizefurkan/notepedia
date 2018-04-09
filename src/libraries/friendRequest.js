@@ -55,5 +55,31 @@ export default {
     } catch (err) {
       return err;
     }
+  },
+  control: async (sourceId, targetId) => {
+    try {
+      const Op = Sequelize.Op;
+      const result = await models.Friend.findOne({
+        where: {
+          [Op.and]: [
+            {
+              [Op.or]: [
+                { sourceId: sourceId },
+                { targetId: sourceId }
+              ]
+            },
+            {
+              [Op.or]: [
+                { sourceId: targetId },
+                { targetId: targetId }
+              ]
+            }
+          ]
+        }
+      });
+      return result;
+    } catch (err) {
+      return err;
+    }
   }
 };

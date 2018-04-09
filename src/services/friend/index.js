@@ -29,11 +29,11 @@ export default [
           result = await dbo.friend.control(sourceUser.id, targetUser.id);
           if (result === null) {
             result = await dbo.friendRequest.control(sourceUser.id, targetUser.id);
-            if (result === null) {
+            if (!result.success) {
               result = await models.FriendsRequest.create({
                 sourceId: sourceUser.id,
                 targetId: targetUser.id
-              })
+              });
               res.send({
                 success: true,
                 message: replies.successFriendshipRequest,

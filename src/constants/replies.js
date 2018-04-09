@@ -26,5 +26,6 @@ export default {
   successFriendshipRequest: 'Friendship request was successfully sent.',
   acceptedFriendRequest: 'Friend Request was accepted successfully.',
   friendDeleted: 'Friend delete process successfully done.',
-  youDonthavePermissionTo: 'You dont have permission to '
+  youDonthavePermissionTo: 'You dont have permission to ',
+  youCanOnlyShareWithYourFriend: 'You can only share with your friend'
 }

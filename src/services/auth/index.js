@@ -6,22 +6,6 @@ import jwToken from '../../config/jwToken';
 
 export default [
   {
-    method: 'get',
-    path: '/login',
-    handler: async (req, res) => {
-      const result = await dbo.common.getAll('User');
-      const userlist = [];
-      result.data.forEach(item => {
-        userlist.push(item.id + ' ' + item.username + ' ' + item.password);
-      });
-      res.send({
-        count: result.data.length,
-        users: userlist
-      });
-      // res.send('login get');
-    }
-  },
-  {
     method: 'post',
     path: '/login',
     handler: async (req, res) => {
@@ -56,13 +40,6 @@ export default [
       } catch (err) {
         res.send(err);
       }
-    }
-  },
-  {
-    method: 'get',
-    path: '/register',
-    handler: (req, res) => {
-      res.send('register get');
     }
   },
   {

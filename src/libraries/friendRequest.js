@@ -1,66 +1,47 @@
 import Sequelize from 'sequelize';
 import { models } from '../models';
+import consts from '../constants/friendsRequest';
 
 export default {
-  getAll: (userId) => {
-    return new Promise((resolve, reject) => {
+  getAll: async (userId) => {
+    try {
       const Op = Sequelize.Op
-      models.FriendsRequest.findAll({
+      const result = await models.FriendsRequest.findAll({
         where: {
           [Op.or]: [
             { sourceId: userId },
             { targetId: userId }
           ]
-        }
-      }).then(response => {
-        resolve(response)
-      }).catch(error => {
-        reject(error)
-      })
-    })
+        },
+        include: [
+          {
+            model: models.User,
+            as: 'source'
+          },
+          {
+            model: models.User,
+            as: 'target'
+          }
+        ]
+      });
+      return result;
+    } catch (err) {
+      return err;
+    }
   },
-  
-  control: (source, target) => {
-    return new Promise((resolve, reject) => {
-      const Op = Sequelize.Op
-      models.FriendsRequest.findOne({
-        where: {
-          [Op.and]: [
-            {
-              [Op.or]: [
-                { sourceId: source },
-                { targetId: source }
-              ]
-            },
-            {
-              [Op.or]: [
-                { sourceId: target },
-                { targetId: target }
-              ]
-            }
-          ]
-        }
-      }).then(result => {
-        resolve(result)
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },
-  checkWithId: (key, requestId, userId) => {
-    return new Promise((resolve, reject) => {
-      const Op = Sequelize.Op
-      if (key === 'accept') {
-        models.FriendsRequest.findOne({
+  checkWithId: async (key, requestId, userId) => {
+    try {
+      const Op = Sequelize.Op;
+      if (key === consts.accept) {
+        const result = await models.FriendsRequest.findOne({
           where: {
             id: requestId,
             targetId: userId
           }
-        }).then(result => {
-          resolve(result)
         })
+        return result;
       } else {
-        models.FriendsRequest.findOne({
+        const result = await models.FriendsRequest.findOne({
           where: {
             id: requestId,
             [Op.or]: [
@@ -68,10 +49,11 @@ export default {
               { targetId: userId }
             ]
           }
-        }).then(result => {
-          resolve(result)
-        })
+        });
+        return result;
       }
-    })
+    } catch (err) {
+      return err;
+    }
   }
 };

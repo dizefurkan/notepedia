@@ -10,5 +10,5 @@ export default (token) => {
         resolve(data);
       }
     });
-  })
+  });
 };

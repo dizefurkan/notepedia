@@ -7,9 +7,10 @@ export default [
   {
     method: 'post',
     path: '/friends/add/:username',
-    handler: (req, res) => {
-      const token = req.headers[jwToken.name];
-      dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const token = req.headers[jwToken.name];
+        const result = await dbo.verifyToken(token);
         const { username } = req.params;
         const sourceUser = result.data;
         if (username === sourceUser.username) {
@@ -18,109 +19,114 @@ export default [
             message: replies.sameUser
           });
         } else {
-          dbo.common.findOne('User', 'username', username).then(result => {
-            const targetUser = result.user;
-            dbo.friend.control(sourceUser.id, targetUser.id).then(result => {
-              if (result === null) {
-                dbo.friendRequest.control(sourceUser.id, targetUser.id).then(result => {
-                  if (result === null) {
-                    models.FriendsRequest.create({
-                      sourceId: sourceUser.id,
-                      targetId: targetUser.id
-                    }).then(result => {
-                      res.send({
-                        success: true,
-                        message: replies.successFriendshipRequest,
-                        data: result
-                      });
-                    }).catch(error => {
-                      res.send({
-                        success: false,
-                        error: error
-                      });
-                    });
-                  } else {
-                    res.send({
-                      success: false,
-                      message: replies.alreadySentARequest,
-                      data: result
-                    });
-                  }
-                });
-              } else {
-                res.send({
-                  success: false,
-                  message: replies.alreadyFriends,
-                  data: result
-                });
-              }
-            });
-          }).catch(error => {
+          const query = {
+            where: {
+              username
+            }
+          }
+          let result = await dbo.common.findOne(models.User, query);
+          const targetUser = result.data;
+          result = await dbo.friend.control(sourceUser.id, targetUser.id);
+          if (result === null) {
+            result = await dbo.friendRequest.control(sourceUser.id, targetUser.id);
+            if (result === null) {
+              result = await models.FriendsRequest.create({
+                sourceId: sourceUser.id,
+                targetId: targetUser.id
+              })
+              res.send({
+                success: true,
+                message: replies.successFriendshipRequest,
+                data: result
+              });
+            } else {
+              res.send({
+                success: false,
+                message: replies.alreadySentARequest,
+                data: result
+              });
+            }
+          } else {
             res.send({
               success: false,
-              message: replies.notFound
+              message: replies.alreadyFriends,
+              data: result
             });
-          });
-        }
-      })
+          }
+        };
+      } catch (error) {
+        res.send({
+          success: false,
+          message: replies.notFound
+        });
+      };
     }
   },
   {
     method: 'post',
     path: '/friends/delete/:username',
-    handler: (req, res) => {
-      const username = req.params.username
-      const token = req.headers[jwToken.name]
-      dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const { username } = req.params;
+        const token = req.headers[jwToken.name];
+        const result = await dbo.verifyToken(token);
         const user = result.data;
         if (username === user.username) {
           res.send({
             success: false,
-            message: replies.sameUser
+            message: replies.youCantDeleteYourself
           });
         } else {
-          dbo.common.findOne('User', 'username', username).then(result => {
-            dbo.friend.control(user.id, result.user.id).then(result => {
-              if (result === null) {
-                res.send({
-                  success: false,
-                  message: replies.notFound
-                });
-              } else {
-                models.Friend.destroy({
-                  returning: true,
-                  where: {
-                    id: result.id
-                  }
-                });
-                res.send({
-                  success: true,
-                  message: replies.friendDeleted
-                });
+          const query = {
+            where: {
+              username
+            }
+          }
+          const target = await dbo.common.findOne(models.User, query);
+          const result = await dbo.friend.control(user.id, target.data.id);
+          if (result === null) {
+            res.send({
+              success: false,
+              message: replies.notFound
+            });
+          } else {
+            models.Friend.destroy({
+              returning: true,
+              where: {
+                id: result.id
               }
             });
-          }).catch(error => {
-            res.send(error);
-          });
+            res.send({
+              success: true,
+              message: replies.friendDeleted
+            });
+          }
         }
-      })
+      } catch (err) {
+        res.send(err);
+      }
     }
   },
   {
     method: 'get',
     path: '/friends',
-    handler: (req, res) => {
-      const token = req.headers[jwToken.name];
-      dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const token = req.headers[jwToken.name];
+        let result = await dbo.verifyToken(token);
         const user = result.data;
-        dbo.friend.getAll(user.id).then(result => {
+        result = await dbo.friend.getAll(user.id);
+        if (!result[0]) {
+          res.send({
+            found: false,
+            message: replies.noRecord
+          });
+        } else {
           res.send(result);
-        }).catch(error => {
-          res.send(error)
-        });
-      }).catch(error => {
-        res.send(error);
-      });
+        }
+      } catch (err) {
+        res.send(err);
+      }
     }
   }
 ];

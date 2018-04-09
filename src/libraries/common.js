@@ -6,22 +6,24 @@ export default {
     const data = await model.findOne({
       ...query
     });
-    return data;
+    let response = {};
+    if (data) {
+      response = {
+        found: true,
+        message: replies.found,
+        data: data
+      };
+    } else {
+      response = {
+        found: false,
+        message: replies.notFound
+      };
+    };
+    return response;
   },
-  // findOne: (table, field, value) => {
-  //   return new Promise((resolve, reject) => {
-  //     models[table].findOne({ where: { [field]: value } }).then(response => {
-  //       if (response) {
-  //         resolve({ found: true, message: replies.found, data: response });
-  //       } else {
-  //         resolve({ found: false, message: replies.notFound });
-  //       }
-  //     });
-  //   });
-  // },
-  getAll: (table) => {
+  getAll: (model) => {
     return new Promise((resolve, reject) => {
-      models[table].findAll().then(response => {
+      model.findAll().then(response => {
         if (response) {
           resolve({ success: true, message: replies.found, data: response });
         } else {
@@ -30,53 +32,30 @@ export default {
       });
     });
   },
-  getAllByKey: (table, key, value) => {
-    return new Promise((resolve, reject) => {
-      models[table].findAll({
-        where: {
-          [key]: value
-        }
-      }).then(response => {
-        resolve({ data: response });
-      }).catch(error => {
-        reject({ error: error });
+  getAllByKey: async (model, query) => {
+    try {
+      const result = model.findAll({
+        ...query
       });
-    });
+      return result;
+    } catch (err) {
+      return err;
+    }
   },
-  findOneWithInclude: (table, key, value, modelName, asName) => {
-    return new Promise((resolve, reject) => {
-      models[table].findOne({
-        where: {
-          [key]: value
-        },
-        include: [{
-          model: models[modelName],
-          as: asName,
-          required: true
-        }]
-      }).then(response => {
-        resolve(response)
-      }).catch(error => {
-        reject(error)
-      });
-    });
+  findOneWithInclude: async (model, query) => {
+    try {
+      const result = await model.findOne({...query});
+      return result;
+    } catch (err) {
+      return err;
+    }
   },
-  getAllWithInclude: (table, key, value, modelName, asName) => {
-    return new Promise((resolve, reject) => {
-      models[table].findAll({
-        where: {
-          [key]: value
-        },
-        include: [{
-          model: models[modelName],
-          as: asName,
-          required: true
-        }]
-      }).then(response => {
-        resolve(response);
-      }).catch(error => {
-        reject(error);
-      });
-    });
+  getAllWithInclude: async (model, query) => {
+    try {
+      const result = await model.findAll({...query});
+      return result;
+    } catch (err) {
+      return err;
+    }
   }
 };

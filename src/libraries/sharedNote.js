@@ -1,47 +1,42 @@
 import { models } from '../models';
 
 export default {
-  check: (userId, noteId) => {
-    return new Promise((resolve, reject) => {
-      models.SharedNote.findOne({
+  getAllById: async (id, filter) => {
+    let promise;
+    if (filter === 'guest') {
+      promise = await models.SharedNote.findAll({
         where: {
-          userId: userId,
-          noteId: noteId
-        }
-      }).then(result => {
-        resolve(result)
-      })
-    })
-  },
-  getAllById: (id, filter) => {
-    return new Promise((resolve, reject) => {
-      let promise
-      if (filter === 'guest') {
-        promise = models.SharedNote.findAll({
-          where: {
-            userId: id
-          },
-          include: [{
+          userId: id
+        },
+        include: [
+          {
             model: models.Note,
             as: 'note',
-            required: true
-          }]
-        })
-      } else {
-        promise = models.SharedNote.findAll({
-          include: [{
+            required: true,
+            include: [{
+              model: models.User,
+              as: 'owner'
+            }]
+          }
+        ]
+      });
+    } else {
+      promise = await models.SharedNote.findAll({
+        include: [
+          {
+            model: models.User,
+            as: 'user'
+          },
+          {
             model: models.Note,
             as: 'note',
             where: {
               userId: id
             }
-          }]
-        })
-      }
-      promise
-        .then(result => {
-          resolve(result)
-        })
-    })
+          }
+        ]
+      })
+    }
+    return promise;
   }
 };

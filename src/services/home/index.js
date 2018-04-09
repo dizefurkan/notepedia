@@ -1,4 +1,5 @@
 import { dbo } from '../../libraries';
+import { models } from '../../models';
 
 export default [
   {
@@ -7,8 +8,7 @@ export default [
     handler: (req, res) => {
       res.send({
         success: true,
-        message: 'home get',
-        data: req.decoded
+        message: 'home get'
       });
     }
   },
@@ -22,21 +22,20 @@ export default [
   {
     method: 'get',
     path: '/users',
-    handler: (req, res) => {
-      dbo.common.getAll('User').then(response => {
+    handler: async (req, res) => {
+      try {
+        const result = await dbo.common.getAll(models.User);
         const userlist = [];
-        response.data.forEach(item => {
+        result.data.forEach(item => {
           userlist.push(item.id + ' ' + item.username + ' ' + item.password);
-        })
+        });
         res.send({
-          count: response.data.length,
+          count: result.data.length,
           users: userlist
         });
-      }).catch(error => {
-        res.send({
-          error: error
-        });
-      });
+      } catch (err) {
+        res.send(err);
+      }
     }
   }
 ];

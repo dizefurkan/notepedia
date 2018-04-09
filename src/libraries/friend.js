@@ -2,27 +2,38 @@ import Sequelize from 'sequelize';
 import { models } from '../models';
 
 export default {
-  getAll: (userId) => {
-    return new Promise((resolve, reject) => {
-      const Op = Sequelize.Op
-      models.Friend.findAll({
+  getAll: async (userId) => {
+    try {
+      const Op = Sequelize.Op;
+      const result = await models.Friend.findAll({
         where: {
           [Op.or]: [
             { senderId: userId },
             { acceptorId: userId }
           ]
-        }
-      }).then(response => {
-        resolve(response)
-      }).catch(error => {
-        reject(error)
-      })
-    })
+        },
+        include: [
+          {
+            model: models.User,
+            as: 'sender',
+            required: true
+          },
+          {
+            model: models.User,
+            as: 'acceptor',
+            required: true
+          }
+        ]
+      });
+      return result;
+    } catch (err) {
+      return err;
+    }
   },
-  control: (sender, acceptor) => {
-    return new Promise((resolve, reject) => {
-      const Op = Sequelize.Op
-      models.Friend.findOne({
+  control: async (sender, acceptor) => {
+    try {
+      const Op = Sequelize.Op;
+      const result = await models.Friend.findOne({
         where: {
           [Op.and]: [
             {
@@ -39,11 +50,10 @@ export default {
             }
           ]
         }
-      }).then(result => {
-        resolve(result)
-      }).catch(error => {
-        reject(error)
-      })
-    })
+      });
+      return result;
+    } catch (err) {
+      return err;
+    }
   }
 };

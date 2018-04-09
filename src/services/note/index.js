@@ -7,28 +7,37 @@ export default [
   {
     method: 'get',
     path: '/mynotes',
-    handler: (req, res) => {
-      const token = req.headers[jwToken.name];
-      dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const token = req.headers[jwToken.name];
+        let result = await dbo.verifyToken(token);
         const user = result.data;
-        dbo.common.getAllWithInclude('Note', 'userId', user.id, 'User', 'owner').then(result => {
-          res.send(result);
-        }).catch(error => {
-          res.send(error);
-        });
-      }).catch(error => {
-        res.send(error);
-      });
+        const query = {
+          where: {
+            userId: user.id
+          },
+          include: [{
+            model: models.User,
+            as: 'owner',
+            required: true
+          }]
+        };
+        result = await dbo.common.getAllWithInclude(models.Note, query);
+        res.send(result);
+      } catch (err) {
+        res.send(err);
+      }
     }
   },
   {
     method: 'post',
     path: '/mynotes/add',
-    handler: (req, res) => {
-      const { title, content } = req.body;
-      if (title || content) {
-        const token = req.headers['token'];
-        dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const { title, content } = req.body;
+        if (title) {
+          const token = req.headers['token'];
+          const result = await dbo.verifyToken(token);
           const user = result.data;
           models.Note.create({
             title: title,
@@ -39,145 +48,153 @@ export default [
             success: true,
             message: 'Note' + replies.wasCreated
           });
-        }).catch(error => {
+        } else {
           res.send({
-            error: 'hahah'
+            success: false,
+            message: replies.cantEmpty
           });
-        });
-      } else {
-        res.send({
-          success: false,
-          message: replies.cantEmpty
-        });
+        }
+      } catch (err) {
+        res.send(err);
       }
     }
   },
   {
     method: 'post',
     path: '/mynotes/update/:id(\\d+)',
-    handler: (req, res) => {
-      const { title, content } = req.body;
-      if (title || content) {
-        const token = req.headers[jwToken.name];
-        dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const { title, content } = req.body;
+        if (title || content) {
+          const token = req.headers[jwToken.name];
+          let result = await dbo.verifyToken(token);
           const user = result.data;
-          dbo.common.findOne('Note', 'id', req.params.id).then(result => {
-            if (result.data.userId === user.id) {
-              models.Note.update(req.body, {
-                where: {
-                  id: req.params.id
-                }
-              }).then(result => {
+          const query = {
+            where: {
+              id: req.params.id
+            }
+          };
+          result = await dbo.common.findOne(models.Note, query);
+          if (!result.found) {
+            res.send({
+              success: false,
+              message: replies.notFound
+            });
+          }
+          if (result.data.userId === user.id) {
+            await models.Note.update(req.body, {
+              where: {
+                id: req.params.id
+              }
+            })
+            res.send({
+              success: true,
+              message: 'Note' + replies.wasUpdated
+            });
+          } else {
+            result = await models.SharedNote.findOne({
+              where: {
+                userId: user.id,
+                noteId: req.params.id
+              }
+            });
+            if (result === null) {
+              res.send({
+                success: false,
+                message: replies.notFound
+              });
+            } else {
+              if (result.canBeEdit) {
+                await models.Note.update(req.body, {
+                  where: {
+                    id: req.params.id
+                  }
+                });
                 res.send({
                   success: true,
                   message: 'Note' + replies.wasUpdated
-                })
-              })
-            } else {
-              models.SharedNote.findOne({
-                where: {
-                  userId: user.id,
-                  noteId: req.params.id
-                }
-              }).then(result => {
-                if (result === null) {
-                  res.send({
-                    success: false,
-                    message: replies.notFound
-                  });
-                } else {
-                  if (result.canBeEdit) {
-                    models.note.update(req.body, {
-                      where: {
-                        id: req.params.id
-                      }
-                    }).then(result => {
-                      res.send({
-                        success: true,
-                        message: 'Note' + replies.wasUpdated
-                      });
-                    });
-                  } else {
-                    res.send({
-                      success: false,
-                      message: replies.youDonthavePermissionTo + 'Update'
-                    });
-                  }
-                }
-              });
+                });
+              } else {
+                res.send({
+                  success: false,
+                  message: replies.youDonthavePermissionTo + 'Update'
+                });
+              }
             }
+          }
+        } else {
+          res.send({
+            success: false,
+            message: replies.cantEmpty
           });
-        }).catch(error => {
-          res.send(error);
-        });
-      } else {
-        res.send({
-          success: false,
-          message: replies.cantEmpty
-        });
+        }
+      } catch (err) {
+        res.send(err);
       }
     }
   },
   {
     method: 'get',
     path: '/mynotes/delete/:id(\\d+)',
-    handler: (req, res) => {
-      const token = req.headers['token'];
-      dbo.verifyToken(token).then(result => {
+    handler: async (req, res) => {
+      try {
+        const token = req.headers['token'];
+        let result = await dbo.verifyToken(token);
         const user = result.data;
-        dbo.common.findOne('Note', 'id', req.params.id).then(result => {
-          if (result.data.userId === user.id) {
-            models.Note.destroy({
+        const query = {
+          where: {
+            id: req.params.id
+          }
+        };
+        result = await dbo.common.findOne(models.Note, query);
+        if (!result.found) {
+          res.send({
+            success: false,
+            message: replies.notFound
+          });
+        }
+        if (result.data.userId === user.id) {
+          result = await models.Note.destroy({
+            returning: true,
+            where: {
+              userId: user.id,
+              id: req.params.id
+            }
+          });
+          res.send({
+            success: true,
+            message: 'Note' + replies.wasDeleted,
+            result: result
+          });
+        } else {
+          result = await models.SharedNote.findOne({
+            where: {
+              noteId: req.params.id,
+              userId: user.id
+            }
+          });
+          if (result.canBeDelete) {
+            result = await models.Note.destroy({
               returning: true,
               where: {
-                userId: user.id,
                 id: req.params.id
               }
-            }).then(result => {
-              res.send({
-                success: true,
-                message: 'Note' + replies.wasDeleted,
-                result: result
-              });
+            });
+            res.send({
+              success: true,
+              message: 'Note' + replies.wasDeleted,
+              result: result
             });
           } else {
-            models.SharedNote.findOne({
-              where: {
-                noteId: req.params.id,
-                userId: user.id,
-                canBeDelete: true
-              }
-            }).then(result => {
-              if (result === null) {
-                res.send({
-                  success: false,
-                  message: replies.notFound
-                });
-              } else {
-                if (result.canBeDelete) {
-                  models.Note.destroy({
-                    returning: true,
-                    where: {
-                      id: req.params.id
-                    }
-                  }).then(result => {
-                    res.send({
-                      success: true,
-                      message: 'Note' + replies.wasDeleted,
-                      result: result
-                    });
-                  });
-                } else {
-                  res.send({
-                    success: false,
-                    message: replies.youDonthavePermissionTo + 'Delete'
-                  });
-                }
-              }
+            res.send({
+              success: false,
+              message: replies.youDonthavePermissionTo + 'Delete'
             });
           }
-        });
-      });
+        }
+      } catch (err) {
+        res.send(err);
+      }
     }
   }
 ];

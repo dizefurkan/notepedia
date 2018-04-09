@@ -1,5 +1,6 @@
 export default {
   sameUser: 'You cant add yourself as a friend',
+  youCantDeleteYourself: 'You cant delete yourself.',
   found: 'Found',
   pageNotFound: 'Page not found.',
   notFound: 'Not found',
@@ -8,7 +9,9 @@ export default {
   noToken: 'No token',
   incorrectToken: 'Incorrect Token',
   welcome: 'Welcome',
+  successful: 'successful',
   wrongPassword: 'Wrong Password',
+  wrongUsernameOrPassword: 'Wrong Username or Password',
   registerSuccess: 'Register Successful',
   thisEmail: 'This Email',
   thisUsername: 'This Username',

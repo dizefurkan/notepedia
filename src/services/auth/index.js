@@ -1,15 +1,24 @@
-import jwt from 'jsonwebtoken';
-import jwToken from '../../config/jwToken';
 import replies from '../../constants/replies';
 import { models } from '../../models';
 import { dbo } from '../../libraries';
+import jwt from 'jsonwebtoken';
+import jwToken from '../../config/jwToken';
 
 export default [
   {
     method: 'get',
     path: '/login',
-    handler: (req, res) => {
-      res.send('login get');
+    handler: async (req, res) => {
+      const result = await dbo.common.getAll('User');
+      const userlist = [];
+      result.data.forEach(item => {
+        userlist.push(item.id + ' ' + item.username + ' ' + item.password);
+      });
+      res.send({
+        count: result.data.length,
+        users: userlist
+      });
+      // res.send('login get');
     }
   },
   {
@@ -21,11 +30,26 @@ export default [
         if (username && password) {
           const query = {
             where: {
-              username
+              username,
+              password
             }
           }
-          const data = await dbo.common.findOne(models.User, query);
-          res.send(data);
+          let result = await dbo.common.findOne(models.User, query);
+          if (result.found) {
+            const { data } = result;
+            const token = jwt.sign({ data }, jwToken.secretKey);
+            result = {
+              found: result.found,
+              data: result.data,
+              token: token
+            }
+            res.send(result);
+          } else {
+            res.send({
+              success: false,
+              message: replies.wrongUsernameOrPassword
+            });
+          }
         } else {
           res.send({ success: false, message: replies.fillRequiredfields });
         }
@@ -44,52 +68,58 @@ export default [
   {
     method: 'post',
     path: '/register',
-    handler: (req, res) => {
-      const { username, email, password, name, surname } = req.body;
-      if (username && email && password && name && surname) {
-        dbo.common.findOne('User', 'username', username).then(data => {
+    handler: async (req, res) => {
+      try {
+        let query = {};
+        const { username, email, password, name, surname } = req.body;
+        if (username && email && password && name && surname) {
+          query = {
+            where: {
+              username
+            }
+          };
+          let data = await dbo.common.findOne(models.User, query);
           if (!data.found) {
-            const emailFind = dbo.common.findOne('User', 'email', email);
-            emailFind.then(data => {
-              if (!data.found) {
-                models.User.create({
-                  username: username,
-                  email: email,
-                  password: password,
-                  name: name,
-                  surname: surname,
-                  isApproved: false
-                }).then((result) => {
-                  res.send({
-                    success: true,
-                    message: replies.registerSuccess,
-                    data: result
-                  });
-                }).catch((error) => {
-                  res.send({
-                    success: false,
-                    message: error
-                  });
-                })
-              } else {
-                res.send({
-                  success: false,
-                  message: replies.thisEmail + replies.alreadyHave
-                });
+            query = {
+              where: {
+                email
               }
-            })
+            };
+            data = await dbo.common.findOne(models.User, query);
+            if (!data.found) {
+              const result = await models.User.create({
+                username: username,
+                email: email,
+                password: password,
+                name: name,
+                surname: surname,
+                isApproved: false
+              });
+              res.send({
+                success: true,
+                message: replies.registerSuccess,
+                data: result
+              });
+            } else {
+              res.send({
+                success: false,
+                message: replies.thisEmail + ' ' + replies.alreadyHave
+              });
+            }
           } else {
             res.send({
               success: false,
-              message: replies.thisUsername + replies.alreadyHave
+              message: replies.thisUsername + ' ' + replies.alreadyHave
             });
           }
-        });
-      } else {
-        res.send({
-          success: false,
-          message: replies.fillRequiredfields
-        });
+        } else {
+          res.send({
+            success: false,
+            message: replies.fillRequiredfields
+          });
+        }
+      } catch (err) {
+        res.send(err);
       }
     }
   }

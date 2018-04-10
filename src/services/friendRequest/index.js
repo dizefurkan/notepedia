@@ -1,3 +1,5 @@
+import Joi from 'joi';
+import validators from './validators';
 import { dbo } from '../../libraries';
 import { models } from '../../models';
 import jwToken from '../../config/jwToken';
@@ -13,6 +15,7 @@ export default [
         const token = req.headers[jwToken.name];
         let result = await dbo.verifyToken(token);
         const requestId = req.params.id;
+        await Joi.validate({requestId}, validators);
         const user = result.data;
         result = await dbo.friendRequest.checkWithId(constFR.accept, requestId, user.id);
         if (result === null) {
@@ -51,6 +54,7 @@ export default [
         let result = await dbo.verifyToken(token);
         const user = result.data;
         const requestId = req.params.id;
+        await Joi.validate({requestId}, validators);
         result = await dbo.friendRequest.checkWithId(constFR.refuse, requestId, user.id);
         if (result === null) {
           res.send({

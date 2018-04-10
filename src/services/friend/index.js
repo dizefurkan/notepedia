@@ -1,3 +1,5 @@
+import Joi from 'joi';
+import validators from './validators';
 import { dbo } from '../../libraries';
 import { models } from '../../models';
 import jwToken from '../../config/jwToken';
@@ -9,10 +11,11 @@ export default [
     path: '/friends/add/:username',
     handler: async (req, res) => {
       try {
-        const token = req.headers[jwToken.name];
-        const result = await dbo.verifyToken(token);
         const { username } = req.params;
+        const token = req.headers[jwToken.name];
+        let result = await dbo.verifyToken(token);
         const sourceUser = result.data;
+        await Joi.validate({username}, validators);
         if (username === sourceUser.username) {
           res.send({
             success: false,
@@ -24,41 +27,45 @@ export default [
               username
             }
           }
-          let result = await dbo.common.findOne(models.User, query);
-          const targetUser = result.data;
-          result = await dbo.friend.control(sourceUser.id, targetUser.id);
-          if (result === null) {
-            result = await dbo.friendRequest.control(sourceUser.id, targetUser.id);
-            if (!result.success) {
-              result = await models.FriendsRequest.create({
-                sourceId: sourceUser.id,
-                targetId: targetUser.id
-              });
-              res.send({
-                success: true,
-                message: replies.successFriendshipRequest,
-                data: result
-              });
+          result = await dbo.common.findOne(models.User, query);
+          if (!result.found) {
+            res.send({
+              success: false,
+              message: replies.notFound
+            });
+          } else {
+            const targetUser = result.data;
+            result = await dbo.friend.control(sourceUser.id, targetUser.id);
+            if (result === null) {
+              result = await dbo.friendRequest.control(sourceUser.id, targetUser.id);
+              if (!result.success) {
+                result = await models.FriendsRequest.create({
+                  sourceId: sourceUser.id,
+                  targetId: targetUser.id
+                });
+                res.send({
+                  success: true,
+                  message: replies.successFriendshipRequest,
+                  data: result
+                });
+              } else {
+                res.send({
+                  success: false,
+                  message: replies.alreadySentARequest,
+                  data: result
+                });
+              }
             } else {
               res.send({
                 success: false,
-                message: replies.alreadySentARequest,
+                message: replies.alreadyFriends,
                 data: result
               });
             }
-          } else {
-            res.send({
-              success: false,
-              message: replies.alreadyFriends,
-              data: result
-            });
           }
         };
-      } catch (error) {
-        res.send({
-          success: false,
-          message: replies.notFound
-        });
+      } catch (err) {
+        res.send(err);
       };
     }
   },
@@ -68,8 +75,9 @@ export default [
     handler: async (req, res) => {
       try {
         const { username } = req.params;
+        await Joi.validate({username}, validators);
         const token = req.headers[jwToken.name];
-        const result = await dbo.verifyToken(token);
+        let result = await dbo.verifyToken(token);
         const user = result.data;
         if (username === user.username) {
           res.send({
@@ -83,7 +91,7 @@ export default [
             }
           }
           const target = await dbo.common.findOne(models.User, query);
-          const result = await dbo.friend.control(user.id, target.data.id);
+          result = await dbo.friend.control(user.id, target.data.id);
           if (result === null) {
             res.send({
               success: false,

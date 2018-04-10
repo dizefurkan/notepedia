@@ -1,3 +1,5 @@
+import Joi from 'joi';
+import validators from './validators';
 import { models } from '../../models';
 import { dbo } from '../../libraries';
 import jwToken from '../../config/jwToken';
@@ -9,89 +11,83 @@ export default [
     path: '/mynotes/share?',
     handler: async (req, res) => {
       try {
+        await Joi.validate({ ...req.query }, validators.share);
         const token = req.headers['token'];
         let result = await dbo.verifyToken(token);
         const user = result.data;
-        const { username, noteId, canEdit, canDelete } = req.query;
+        const { username, noteId, canBeEdit, canBeDelete } = req.query;
         if (username === user.username) {
           res.send({
             success: false,
             message: replies.sameUser
           })
         } else {
-          if (username, noteId, canEdit, canDelete) {
-            let query = {};
-            query = {
-              where: {
-                username
-              }
-            };
-            result = await dbo.common.findOne(models.User, query);
-            if (result.found) {
-              const reqUser = result.data;
-              result = await dbo.friend.control(user.id, reqUser.id);
-              if (result === null) {
+          let query = {};
+          query = {
+            where: {
+              username
+            }
+          };
+          result = await dbo.common.findOne(models.User, query);
+          if (result.found) {
+            const reqUser = result.data;
+            result = await dbo.friend.control(user.id, reqUser.id);
+            if (result === null) {
+              res.send({
+                success: false,
+                message: replies.youCanOnlyShareWithYourFriend
+              })
+            } else {
+              query = {
+                where: {
+                  id: noteId
+                }
+              };
+              result = await dbo.common.findOne(models.Note, query);
+              if (!result.found) {
                 res.send({
                   success: false,
-                  message: replies.youCanOnlyShareWithYourFriend
-                })
+                  message: 'Note ' + replies.notFound
+                });
               } else {
-                query = {
-                  where: {
-                    id: noteId
+                if (result.data.userId === user.id) {
+                  const query = {
+                    where: {
+                      userId: reqUser.id,
+                      noteId: noteId
+                    }
+                  };
+                  result = await dbo.common.findOne(models.SharedNote, query);
+                  if (result.found) {
+                    res.send({
+                      success: false,
+                      message: replies.alreadyHave
+                    });
+                  } else {
+                    result = await models.SharedNote.create({
+                      canBeEdit: canBeEdit,
+                      canBeDelete: canBeDelete,
+                      userId: reqUser.id,
+                      noteId: noteId
+                    })
+                    res.send({
+                      success: true,
+                      message: replies.successful,
+                      data: result
+                    });
                   }
-                };
-                result = await dbo.common.findOne(models.Note, query);
-                if (!result.found) {
+                } else {
                   res.send({
                     success: false,
                     message: 'Note ' + replies.notFound
                   });
-                } else {
-                  if (result.data.userId === user.id) {
-                    const query = {
-                      where: {
-                        userId: reqUser.id,
-                        noteId: noteId
-                      }
-                    };
-                    result = await dbo.common.findOne(models.SharedNote, query);
-                    if (result.found) {
-                      res.send({
-                        success: false,
-                        message: replies.alreadyHave
-                      });
-                    } else {
-                      result = await models.SharedNote.create({
-                        canBeEdit: canEdit,
-                        canBeDelete: canDelete,
-                        userId: reqUser.id,
-                        noteId: noteId
-                      })
-                      res.send({
-                        success: true,
-                        message: replies.successful,
-                        data: result
-                      });
-                    }
-                  } else {
-                    res.send({
-                      success: false,
-                      message: 'Note ' + replies.notFound
-                    });
-                  }
                 }
               }
-            } else {
-              res.send({
-                success: false,
-                message: 'User ' + replies.notFound
-              });
             }
           } else {
             res.send({
               success: false,
-              message: replies.fillRequiredfields
+              message: 'User ' + replies.notFound
             });
           }
         }
@@ -135,50 +131,44 @@ export default [
         let result = await dbo.verifyToken(token);
         const { id } = req.params;
         const { canBeEdit, canBeDelete, noteId, userId } = req.body;
-        if (canBeEdit || canBeDelete || noteId || userId) {
-          const user = result.data;
-          const query = {
-            where: {
-              id
-            },
-            include: [{
-              model: models.Note,
-              as: 'note',
-              required: true
-            }]
-          };
-          result = await dbo.common.findOneWithInclude(models.SharedNote, query);
-          if (result === null) {
+        await Joi.validate({ id: req.params.id, ...req.body }, validators.update);
+        const user = result.data;
+        const query = {
+          where: {
+            id
+          },
+          include: [{
+            model: models.Note,
+            as: 'note',
+            required: true
+          }]
+        };
+        result = await dbo.common.findOneWithInclude(models.SharedNote, query);
+        if (result === null) {
+          res.send({
+            success: false,
+            message: replies.notFound
+          });
+        } else {
+          if (result.note.userId === user.id) {
+            result = await models.SharedNote.update(
+              req.body,
+              {
+                where: {
+                  id
+                }
+              }
+            );
+            res.send({
+              success: true,
+              message: 'Shared Note' + replies.wasUpdated
+            });
+          } else {
             res.send({
               success: false,
               message: replies.notFound
             });
-          } else {
-            if (result.note.userId === user.id) {
-              result = await models.SharedNote.update(
-                req.body,
-                {
-                  where: {
-                    id
-                  }
-                }
-              );
-              res.send({
-                success: true,
-                message: 'Shared Note' + replies.wasUpdated
-              });
-            } else {
-              res.send({
-                success: false,
-                message: replies.notFound
-              });
-            }
           }
-        } else {
-          res.send({
-            success: false,
-            message: replies.fillRequiredfields
-          });
         }
       } catch (err) {
         res.send(err);

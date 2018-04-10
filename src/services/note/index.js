@@ -1,3 +1,5 @@
+import Joi from 'joi';
+import validators from './validators';
 import { models } from '../../models';
 import { dbo } from '../../libraries';
 import jwToken from '../../config/jwToken';
@@ -35,25 +37,19 @@ export default [
     handler: async (req, res) => {
       try {
         const { title, content } = req.body;
-        if (title) {
-          const token = req.headers['token'];
-          const result = await dbo.verifyToken(token);
-          const user = result.data;
-          models.Note.create({
-            title: title,
-            content: content,
-            userId: user.id
-          });
-          res.send({
-            success: true,
-            message: 'Note' + replies.wasCreated
-          });
-        } else {
-          res.send({
-            success: false,
-            message: replies.cantEmpty
-          });
-        }
+        await Joi.validate({ ...req.body }, validators.add);
+        const token = req.headers['token'];
+        const result = await dbo.verifyToken(token);
+        const user = result.data;
+        models.Note.create({
+          title: title,
+          content: content,
+          userId: user.id
+        });
+        res.send({
+          success: true,
+          message: 'Note' + replies.wasCreated
+        });
       } catch (err) {
         res.send(err);
       }
@@ -65,68 +61,62 @@ export default [
     handler: async (req, res) => {
       try {
         const { title, content } = req.body;
-        if (title || content) {
-          const token = req.headers[jwToken.name];
-          let result = await dbo.verifyToken(token);
-          const user = result.data;
-          const query = {
+        await Joi.validate({...req.body}, validators.update);
+        const token = req.headers[jwToken.name];
+        let result = await dbo.verifyToken(token);
+        const user = result.data;
+        const query = {
+          where: {
+            id: req.params.id
+          }
+        };
+        result = await dbo.common.findOne(models.Note, query);
+        if (!result.found) {
+          res.send({
+            success: false,
+            message: replies.notFound
+          });
+        }
+        if (result.data.userId === user.id) {
+          await models.Note.update(req.body, {
             where: {
               id: req.params.id
             }
-          };
-          result = await dbo.common.findOne(models.Note, query);
-          if (!result.found) {
+          })
+          res.send({
+            success: true,
+            message: 'Note' + replies.wasUpdated
+          });
+        } else {
+          result = await models.SharedNote.findOne({
+            where: {
+              userId: user.id,
+              noteId: req.params.id
+            }
+          });
+          if (result === null) {
             res.send({
               success: false,
               message: replies.notFound
             });
-          }
-          if (result.data.userId === user.id) {
-            await models.Note.update(req.body, {
-              where: {
-                id: req.params.id
-              }
-            })
-            res.send({
-              success: true,
-              message: 'Note' + replies.wasUpdated
-            });
           } else {
-            result = await models.SharedNote.findOne({
-              where: {
-                userId: user.id,
-                noteId: req.params.id
-              }
-            });
-            if (result === null) {
+            if (result.canBeEdit) {
+              await models.Note.update(req.body, {
+                where: {
+                  id: req.params.id
+                }
+              });
               res.send({
-                success: false,
-                message: replies.notFound
+                success: true,
+                message: 'Note' + replies.wasUpdated
               });
             } else {
-              if (result.canBeEdit) {
-                await models.Note.update(req.body, {
-                  where: {
-                    id: req.params.id
-                  }
-                });
-                res.send({
-                  success: true,
-                  message: 'Note' + replies.wasUpdated
-                });
-              } else {
-                res.send({
-                  success: false,
-                  message: replies.youDonthavePermissionTo + 'Update'
-                });
-              }
+              res.send({
+                success: false,
+                message: replies.youDonthavePermissionTo + 'Update'
+              });
             }
           }
-        } else {
-          res.send({
-            success: false,
-            message: replies.cantEmpty
-          });
         }
       } catch (err) {
         res.send(err);
@@ -138,7 +128,8 @@ export default [
     path: '/mynotes/delete/:id(\\d+)',
     handler: async (req, res) => {
       try {
-        const token = req.headers['token'];
+        const token = req.headers[jwToken.name];
+        await Joi.validate({ id: req.params.id }, validators.delete);
         let result = await dbo.verifyToken(token);
         const user = result.data;
         const query = {

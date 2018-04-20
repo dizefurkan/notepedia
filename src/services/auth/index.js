@@ -1,11 +1,11 @@
 import Joi from 'joi';
-import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import validators from './validators';
 import jwToken from '../../config/jwToken';
 import { constants } from '../../constants';
 import { models } from '../../models';
 import { dbo } from '../../libraries';
+import crypto from '../../core/crypto';
 
 const { replies } = constants;
 
@@ -19,20 +19,27 @@ export default [
         await Joi.validate({ ...req.body }, validators.login);
         const query = {
           where: {
-            username,
-            password
+            username
           }
         }
         let result = await dbo.common.findOne(models.User, query);
         if (result.found) {
           const { data } = result;
-          const token = jwt.sign({ data }, jwToken.secretKey);
-          result = {
-            found: result.found,
-            data: result.data,
-            token: token
+          const registeredHash = await crypto.verify(password, data.password);
+          if (registeredHash) {
+            const token = jwt.sign({ data }, jwToken.secretKey);
+            result = {
+              found: result.found,
+              data: result.data,
+              token: token
+            }
+            res.send(result);
+          } else {
+            res.send({
+              success: false,
+              message: replies.wrongUsernameOrPassword
+            });
           }
-          res.send(result);
         } else {
           res.send({
             success: false,
@@ -67,12 +74,13 @@ export default [
           };
           data = await dbo.common.findOne(models.User, query);
           if (!data.found) {
+            const hash = await crypto.hash(password);
             result = await models.User.create({
-              username: username,
-              email: email,
-              password: password,
-              name: name,
-              surname: surname,
+              username,
+              email,
+              password: hash,
+              name,
+              surname,
               isApproved: false
             });
             res.send({

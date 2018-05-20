@@ -29,8 +29,9 @@ export default [
           if (registeredHash) {
             const token = jwt.sign({ data }, jwToken.secretKey);
             result = {
+              success: true,
               found: result.found,
-              data: result.data,
+              user: result.data,
               token: token
             }
             res.send(result);
